@@ -328,115 +328,45 @@
       .panel-sub { display:none; }
     }
 
-    /* Impressão / salvar como PDF */
-    @page { size: A4 portrait; margin: 9mm; }
+    /* Impressão: ficha completa, A4 horizontal */
+    @page { size: A4 landscape; margin: 7mm; }
     @media print {
       :root { color-scheme: light; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      html, body { background: var(--bg) !important; color: var(--text) !important; }
-      body { min-height: auto; }
-      .app { width: 100%; max-width: none; margin: 0; padding: 0; }
-      .topbar { margin-bottom: 8px; }
-      .brand-mark { box-shadow: none; }
-      .top-note, .toolbar, .footer-note, .toast,
-      .right-stack > .panel:last-child,
-      .stepper button, .remove-equip, .equip-footer { display: none !important; }
-      .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; align-items: start; }
-      .left-stack, .right-stack { display: contents; }
-      .left-stack > .panel:first-child { grid-column: 1 / -1; }
-      .panel { box-shadow: none; break-inside: avoid; page-break-inside: avoid; border-radius: 7px; }
-      .panel-head { padding: 8px 10px 6px; }
-      .panel-title { font-size: 13px; }
-      .panel-title:before { height: 13px; width: 3px; }
-      .panel-sub { font-size: 8px; }
-      .identity { padding: 9px; }
-      .identity-grid { gap: 6px; }
-      .field { gap: 3px; }
-      .field label { font-size: 7px; }
-      input[type="text"], input[type="number"], select { padding: 5px 6px; font-size: 9px; border-radius: 4px; }
-      .points-card { min-height: 58px; border-radius: 5px; }
-      .points-card .number { font-size: 25px; }
-      .points-card .caption { font-size: 6px; }
-      .attributes { padding: 4px 10px 7px; }
-      .attribute-row { padding: 7px 0; gap: 5px; }
-      .attribute-name { font-size: 12px; }
-      .attribute-desc { font-size: 8px; }
-      .stepper { gap: 0; }
-      .stepper .value { min-width: 24px; font-size: 15px; }
-      .hp-wrap { padding: 9px 10px; gap: 7px; }
-      .heart { font-size: 18px; }
-      .hp-wrap label { font-size: 9px; }
-      .hp-fields { gap:5px; }
-      .hp-field { gap:2px; }
-      .hp-field label { font-size:6px; }
-      .hp-wrap input { width:42px; font-size:13px; padding:4px 2px; }
-      .skills { padding: 4px 9px 8px; column-gap: 8px; }
-      .skill { gap: 4px; padding: 4px 0; }
-      .skill-check { width: 10px; height: 10px; }
-      .skill-check:checked:after { width: 3px; height: 5px; left: 3px; top: 0; }
-      .skill-name { font-size: 8px; }
-      .skill-bonus { width: 28px; padding: 2px !important; font-size: 8px; }
-      .equipment { padding: 7px 10px; }
-      .equipment-list { gap: 4px; }
-      .equipment-row { grid-template-columns: 15px 1fr; gap: 5px; }
-      .equipment-index { font-size: 9px; }
-      .equipment-row input { border: 0; border-bottom: 1px solid var(--line) !important; background: transparent !important; border-radius: 0; padding: 4px 2px; }
-      .left-stack > .panel:nth-child(2), .right-stack > .panel:nth-child(2) { break-inside: avoid; }
-      .brand .eyebrow { font-size: 7px; }
-      h1 { font-size: 19px; }
+      html,body { width:auto!important; min-height:0!important; height:auto!important; overflow:visible!important; background:#fff!important; color:#20251f!important; }
+      body { margin:0!important; } .app { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; }
+      .topbar { margin:0 0 5mm!important; padding:0 0 3mm!important; border-bottom:1px solid #c8c8c0!important; }
+      .brand-mark { width:9mm!important; height:9mm!important; box-shadow:none!important; } h1 { font-size:16pt!important; color:#20251f!important; } .eyebrow { font-size:6pt!important; }
+      .top-note,.home-nav,.toolbar,.sheet-tabs,.footer-note,.toast,.dice-content,.inventory-filters,.equip-footer,.remove-equip,.skill-step,.stepper button,.condition-row button,.portrait-actions,.btn,[data-action] { display:none!important; }
+      #sheet { display:grid!important; grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important; gap:3mm!important; align-items:start!important; }
+      .main-tab-panel,.left-stack,.right-stack { display:contents!important; }
+      .character-tab-panel,.journal-panel,.combat-panel { display:block!important; grid-column:1/-1!important; }
+      .hidden:not(.main-tab-panel):not(.character-tab-panel):not(.journal-panel):not(.combat-panel) { display:none!important; }
+      .left-stack > .panel:first-child { grid-column:1/-1!important; } .left-stack > .panel:nth-child(2) { grid-column:1!important; }
+      .right-stack > .panel:first-child { grid-column:2!important; } .right-stack > .panel:nth-child(2) { grid-column:1/-1!important; } .right-stack > .panel:last-child { display:none!important; }
+      .panel { min-width:0!important; background:#fff!important; color:#20251f!important; border:1px solid #c9cec5!important; border-radius:5px!important; box-shadow:none!important; break-inside:avoid; page-break-inside:avoid; }
+      .panel-head { padding:2.5mm 3mm 1.5mm!important; border-bottom-color:#d9ddd5!important; } .panel-title { color:#30392f!important; font-size:9pt!important; }
+      .panel-sub,.attribute-desc,.field label,.caption { color:#626b60!important; font-size:6.5pt!important; }
+      .identity,.attributes,.equipment,.skills,.condition-cards { padding:2mm 3mm!important; } .identity-grid { gap:2mm!important; } .field { gap:1mm!important; }
+      input,select,textarea { color:#20251f!important; background:#fff!important; border-color:#c9cec5!important; box-shadow:none!important; font-size:7.5pt!important; }
+      input[type="text"],input[type="number"],select { padding:1.2mm 1.5mm!important; } textarea { min-height:14mm!important; resize:none!important; }
+      .points-card { min-height:13mm!important; background:#f4f5f1!important; border-color:#d9ddd5!important; } .points-card .number { color:#30392f!important; font-size:16pt!important; }
+      .attributes { display:grid!important; grid-template-columns:1fr 1fr!important; gap:0 4mm!important; } .attribute-row { padding:1.5mm 0!important; border-bottom:1px solid #e1e4de!important; }
+      .attribute-name { color:#30392f!important; font-size:8pt!important; } .attribute-desc { font-size:6pt!important; } .stepper .value,.attribute-value { color:#20251f!important; font-size:9pt!important; }
+      .resource-list { gap:2mm!important; padding:2mm!important; } .resource-card { background:#f7f8f5!important; border-color:#d9ddd5!important; padding:2mm!important; }
+      .resource-head,.resource-values { color:#30392f!important; font-size:7pt!important; } .resource-track { background:#e4e7e0!important; }
+      .skills { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:0 3mm!important; } .skill { gap:1.2mm!important; padding:1mm 0!important; border-bottom-color:#e1e4de!important; }
+      .skill-name { color:#30392f!important; font-size:6.5pt!important; } .skill-check { width:3mm!important; height:3mm!important; } .skill-bonus-control { gap:0!important; }
+      .skill-bonus { width:7mm!important; padding:.5mm!important; font-size:6.5pt!important; }
+      .equipment-list { display:grid!important; grid-template-columns:1fr 1fr!important; gap:1mm 3mm!important; } .equipment-row { grid-template-columns:5mm 1fr!important; gap:1mm!important; }
+      .equipment-row input { border:0!important; border-bottom:1px solid #d9ddd5!important; border-radius:0!important; }
+      .inventory-row,.condition-card,.roster-card { background:#f8f9f6!important; border-color:#d9ddd5!important; color:#30392f!important; break-inside:avoid; }
+      .character-tab-panel { break-before:page; } .character-grid { display:grid!important; grid-template-columns:.8fr 1.2fr!important; gap:4mm!important; padding:3mm!important; }
+      .portrait-preview { max-width:65mm!important; max-height:75mm!important; object-fit:contain!important; } .condition-list { display:none!important; } .character-fields { gap:3mm!important; }
+      .campaign-roster { display:grid!important; grid-template-columns:1fr 1fr!important; gap:2mm!important; } .journal-panel,.combat-panel { margin-top:3mm!important; }
+      .journal-panel textarea { min-height:18mm!important; } .condition-cards { display:flex!important; flex-wrap:wrap!important; gap:2mm!important; }
+      .condition-card { padding:2mm!important; } .skill-trained { background:#f4f2e9!important; }
     }
-
-
-    /* Impressão compacta: distribui os blocos pela folha A4 horizontal */
-    @page { size: A4 landscape; margin: 5mm; }
-    @media print {
-      html, body { width: 287mm !important; min-height: 200mm !important; height: auto !important; overflow: visible !important; }
-      .app { width: 100% !important; padding: 0 !important; margin: 0 !important; }
-      .topbar { margin: 0 0 2mm !important; }
-      .brand-mark { width: 8mm !important; height: 8mm !important; font-size: 13px !important; }
-      h1 { font-size: 15px !important; }
-      .eyebrow { font-size: 6px !important; }
-      .layout { display: grid !important; grid-template-columns: minmax(0,.78fr) minmax(0,.82fr) minmax(0,1.8fr) !important; gap: 2mm !important; align-items: start !important; }
-      .left-stack, .right-stack { display: contents !important; }
-      .left-stack > .panel:first-child { grid-column: 1 / -1 !important; }
-      .left-stack > .panel:nth-child(2) { grid-column: 1 !important; }
-      .left-stack > .panel:nth-child(3) { grid-column: 2 !important; }
-      .right-stack > .panel:first-child { grid-column: 1 / 3 !important; }
-      .right-stack > .panel:nth-child(2) { grid-column: 3 !important; grid-row: 2 / span 2 !important; }
-      .panel { border-radius: 4px !important; }
-      .panel-head { padding: 3px 6px 2px !important; }
-      .panel-title { font-size: 10px !important; }
-      .panel-title:before { height: 10px !important; }
-      .panel-sub { font-size: 6px !important; }
-      .identity { padding: 5px !important; }
-      .identity-grid { gap: 4px !important; grid-template-columns: 1.5fr .7fr .8fr .8fr !important; }
-      .field { gap: 2px !important; }
-      .field.name, .field.origin, .field.class { grid-column: span 2 !important; }
-      .points-card { min-height: 42px !important; }
-      .points-card .number { font-size: 19px !important; }
-      .points-card .caption { font-size: 5px !important; }
-      .attributes { padding: 2px 7px 4px !important; }
-      .attribute-row { padding: 3px 0 !important; }
-      .attribute-name { font-size: 9px !important; }
-      .attribute-desc { font-size: 6px !important; margin-top: 0 !important; }
-      .stepper .value { font-size: 12px !important; }
-      .hp-wrap { padding: 5px 7px !important; }
-      .hp-wrap input { width: 34px !important; font-size: 11px !important; }
-      .skills { grid-template-columns: repeat(3,minmax(0,1fr)) !important; column-gap: 5px !important; padding: 2px 6px 4px !important; }
-      .skill { padding: 1px 0 !important; gap: 2px !important; }
-      .skill-name { font-size: 7px !important; }
-      .skill-check { width: 8px !important; height: 8px !important; }
-      .skill-bonus { width: 22px !important; font-size: 7px !important; padding: 1px !important; }
-      .equipment { padding: 3px 6px !important; }
-      .equipment-list { grid-template-columns: 1fr !important; display: grid !important; gap: 1px 5px !important; }
-      .equipment-row { grid-template-columns: 11px 1fr !important; gap: 3px !important; }
-      .equipment-index { font-size: 7px !important; }
-      .equipment-row input { font-size: 7px !important; padding: 2px !important; }
-      .right-stack > .panel:last-child { display: none !important; }
-      .footer-note, .toolbar, .top-note, .toast, .stepper button, .remove-equip, .equip-footer { display: none !important; }
-      input { color: var(--text) !important; }
-    }
-
 
     .auth-screen { min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(ellipse at 50% 0%,rgba(189,140,255,.12),transparent 45%),var(--bg); }
     .auth-card { width:min(430px,100%); padding:28px; border:1px solid var(--line); border-radius:18px; background:var(--panel); box-shadow:var(--shadow); }
@@ -472,6 +402,7 @@
     .hub-choice{position:relative;overflow:hidden;min-height:164px;border-radius:16px;padding:20px;background:linear-gradient(150deg,color-mix(in srgb,var(--panel-2) 94%,var(--accent) 6%),var(--panel));box-shadow:0 8px 22px rgba(0,0,0,.12)}
     .hub-choice span{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--accent) 10%,var(--panel));font-size:20px}
     .hub-choice strong{font-size:20px}.hub-choice small{max-width:260px}
+    .personal-sheets-head{align-items:flex-end;margin:4px 0 3px}.gallery-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.personal-sheet-card-wrap{display:grid;gap:7px;min-width:0}.personal-sheet-card-wrap .personal-sheet-card{width:100%}.sheet-card-actions{display:flex;gap:6px;justify-content:flex-end}.sheet-card-actions .btn{flex:1}
     .personal-sheets-head{align-items:flex-end;margin:4px 0 3px}.gallery-count{display:inline-block;margin-top:7px;color:var(--muted);font-size:11px;font-weight:700}
     .gallery-tools{display:grid;grid-template-columns:minmax(200px,1fr) minmax(150px,.32fr) minmax(150px,.32fr);gap:9px;margin:2px 0 4px}
     .gallery-tools input,.gallery-tools select{width:100%;min-width:0}
@@ -507,7 +438,7 @@
     .roster-conditions{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}.roster-condition{padding:4px 7px;border:1px solid color-mix(in srgb,var(--condition-color) 55%,var(--line));border-left:3px solid var(--condition-color);border-radius:7px;background:color-mix(in srgb,var(--condition-color) 10%,var(--panel));font-size:9px;font-weight:800}
     .roster-no-condition{color:var(--muted);font-size:10px}.roster-card>small{display:block;margin-top:11px;color:var(--muted);font-size:9px}
     .campaign-workspace-footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px;padding-top:14px;border-top:1px solid var(--line-soft)}
-    @media(max-width:700px){.app{width:calc(100% - 22px);padding-top:14px}.gallery-tools{grid-template-columns:1fr 1fr}.gallery-tools input{grid-column:1/-1}.roster-tools{grid-template-columns:1fr 1fr;flex-basis:100%}.roster-tools input{grid-column:1/-1}.personal-sheets-head{align-items:flex-start}.personal-sheets-head .btn{width:100%}.personal-sheets-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.personal-sheet-info{padding:10px}.personal-sheet-info strong{font-size:14px}.sheet-card-meta{font-size:9px}.campaign-roster{grid-template-columns:1fr}.roster-summary{gap:6px}.roster-summary>div{padding:10px}}
+    @media(max-width:700px){.app{width:calc(100% - 22px);padding-top:14px}.gallery-tools{grid-template-columns:1fr 1fr}.gallery-tools input{grid-column:1/-1}.roster-tools{grid-template-columns:1fr 1fr;flex-basis:100%}.roster-tools input{grid-column:1/-1}.personal-sheets-head{align-items:flex-start}.personal-sheets-head .btn{width:auto}.gallery-actions{width:100%;justify-content:stretch}.gallery-actions .btn{flex:1}.personal-sheets-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.personal-sheet-info{padding:10px}.personal-sheet-info strong{font-size:14px}.sheet-card-meta{font-size:9px}.campaign-roster{grid-template-columns:1fr}.roster-summary{gap:6px}.roster-summary>div{padding:10px}}
     @media(max-width:390px){.personal-sheets-grid{grid-template-columns:1fr}.roster-tools{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){.personal-sheet-card,.personal-sheet-art img,.hub-choice{transition:none}}
 
@@ -536,30 +467,15 @@
         <div class="brand-mark">✦</div>
         <div><div class="eyebrow">Arquivo de campanha</div><h1>Crônica <span style="color:var(--accent)">/</span> Ficha de personagem</h1></div>
       </div>
-      <div class="top-note">Cada personagem tem seus próprios atributos,<br>perícias, equipamentos e histórico de rolagens.</div><button class="btn home-nav hidden" id="backToHome" type="button">⌂ Início</button>
+      <button class="btn home-nav hidden" id="backToHome" type="button">⌂ Início</button>
     </header>
 
-    <section id="campaignHub" class="campaign-hub hidden"><div class="campaign-hero"><div class="eyebrow">Crônica · mesa de jogo</div><h2>O que vamos jogar hoje?</h2><p>Escolha seu caminho. Você pode voltar para esta página sempre que quiser.</p></div><div id="hubHome"><div class="hub-choice-grid"><button class="hub-choice" type="button" data-hub-go="create"><span>✦</span><strong>Sou o mestre</strong><small>Criar uma campanha e acompanhar os personagens.</small></button><button class="hub-choice" type="button" data-hub-go="join"><span>↗</span><strong>Tenho um código</strong><small>Entrar na campanha criada pelo mestre.</small></button><button class="hub-choice" type="button" data-hub-go="sheets"><span>▤</span><strong>Minhas fichas</strong><small>Acessar e editar meus personagens pessoais.</small></button></div><div class="panel" style="padding:16px"><div class="panel-head" style="padding:0 0 12px"><h2 class="panel-title">Minhas campanhas</h2></div><div id="campaignList" class="campaign-list"></div></div></div><div id="hubCreate" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="createCampaignForm"><h3>✦ Criar campanha</h3><p>Você será o mestre e acompanhará os personagens do grupo.</p><input id="newCampaignName" type="text" maxlength="70" minlength="2" placeholder="Nome da campanha" required><button class="btn primary" type="submit">Criar mesa</button></form></div><div id="hubJoin" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="joinCampaignForm"><h3>↗ Entrar por convite</h3><p>Digite o código enviado pelo mestre.</p><input id="joinCampaignCode" type="text" maxlength="8" placeholder="CÓDIGO" required><button class="btn primary" type="submit">Entrar na campanha</button></form></div><div id="hubSheets" class="hub-subview hidden"><div class="personal-sheets-head"><div><div class="eyebrow">Seu arquivo de personagens</div><h2 style="margin:4px 0;font:700 24px Georgia,serif">Minhas fichas</h2><p class="panel-sub">Todas as suas fichas em um só lugar. Escolha uma para continuar.</p><span class="gallery-count" id="galleryCount">0 fichas</span></div><button class="btn primary" type="button" id="createSheetFromGallery">＋ Criar nova ficha</button></div><div class="gallery-tools"><input id="gallerySearch" type="search" placeholder="⌕ Buscar por nome, classe ou origem..." aria-label="Buscar fichas"><select id="galleryClassFilter" aria-label="Filtrar por classe"><option value="all">Todas as classes</option><option value="Superhumano">Superhumano</option><option value="Nexus">Nexus</option><option value="Humano">Humano</option></select><select id="gallerySort" aria-label="Ordenar fichas"><option value="recent">Mais recentes</option><option value="name">Nome A-Z</option><option value="oldest">Mais antigas</option></select></div><div id="personalSheetsGrid" class="personal-sheets-grid"></div><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button></div></section><section id="campaignWorkspace" class="campaign-workspace hidden"></section>
-    <section class="toolbar" aria-label="Gerenciar personagens">
-      <select id="playerSelect" aria-label="Personagem ativo"></select>
-      <button class="btn primary" id="newPlayerBtn">＋ Novo personagem</button>
-      <button class="btn" id="duplicateBtn">⧉ Duplicar</button>
-      <button class="btn danger" id="deleteBtn">Excluir</button>
-      <button class="btn" id="exportOneBtn">↓ Exportar ficha</button>
-      <button class="btn" id="exportAllBtn">↓ Backup geral</button>
-      <button class="btn" id="importBtn">↑ Importar</button>
-      <button class="btn primary" id="printPdfBtn">▤ Gerar PDF / Imprimir</button>
-      <input id="importFile" class="hidden" type="file" accept=".json,application/json" />
-      <div class="theme-picker" role="group" aria-label="Escolher tema de cores">
-        <span class="theme-label">Tema</span>
-        <button class="theme-swatch" type="button" data-theme-choice="roxo" aria-label="Tema roxo" title="Roxo" aria-pressed="false"></button>
-        <button class="theme-swatch" type="button" data-theme-choice="vermelho" aria-label="Tema vermelho" title="Vermelho" aria-pressed="false"></button>
-        <button class="theme-swatch" type="button" data-theme-choice="amarelo" aria-label="Tema amarelo" title="Amarelo" aria-pressed="false"></button>
-        <button class="theme-swatch" type="button" data-theme-choice="preto" aria-label="Tema preto" title="Preto" aria-pressed="false"></button>
-      </div>
-      <span class="auth-user" id="authUserLabel"></span>
-      <button class="btn small" id="logoutBtn" type="button">Sair</button>
-      <div class="save-state"><span class="dot"></span><span id="saveLabel">Conectando...</span></div>
+    <section id="campaignHub" class="campaign-hub hidden"><div class="campaign-hero"><div class="eyebrow">Crônica · mesa de jogo</div><h2>O que vamos jogar hoje?</h2><p>Escolha seu caminho. Você pode voltar para esta página sempre que quiser.</p></div><div id="hubHome"><div class="hub-choice-grid"><button class="hub-choice" type="button" data-hub-go="create"><span>✦</span><strong>Sou o mestre</strong><small>Criar uma campanha e acompanhar os personagens.</small></button><button class="hub-choice" type="button" data-hub-go="join"><span>↗</span><strong>Tenho um código</strong><small>Entrar na campanha criada pelo mestre.</small></button><button class="hub-choice" type="button" data-hub-go="sheets"><span>▤</span><strong>Minhas fichas</strong><small>Acessar e editar meus personagens pessoais.</small></button></div><div class="panel" style="padding:16px"><div class="panel-head" style="padding:0 0 12px"><h2 class="panel-title">Minhas campanhas</h2></div><div id="campaignList" class="campaign-list"></div></div></div><div id="hubCreate" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="createCampaignForm"><h3>✦ Criar campanha</h3><p>Você será o mestre e acompanhará os personagens do grupo.</p><input id="newCampaignName" type="text" maxlength="70" minlength="2" placeholder="Nome da campanha" required><button class="btn primary" type="submit">Criar mesa</button></form></div><div id="hubJoin" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="joinCampaignForm"><h3>↗ Entrar por convite</h3><p>Digite o código enviado pelo mestre.</p><input id="joinCampaignCode" type="text" maxlength="8" placeholder="CÓDIGO" required><button class="btn primary" type="submit">Entrar na campanha</button></form></div><div id="hubSheets" class="hub-subview hidden"><div class="personal-sheets-head"><div><div class="eyebrow">Seu arquivo de personagens</div><h2 style="margin:4px 0;font:700 24px Georgia,serif">Minhas fichas</h2><p class="panel-sub">Todas as suas fichas em um só lugar. Escolha uma para continuar.</p><span class="gallery-count" id="galleryCount">0 fichas</span></div><div class="gallery-actions"><button class="btn primary" type="button" id="createSheetFromGallery">＋ Criar nova ficha</button><button class="btn" type="button" id="importSheetsGallery">↑ Importar fichas</button><button class="btn" type="button" id="exportAllGallery">↓ Backup geral</button><input id="importFile" class="hidden" type="file" accept=".json,application/json"></div></div><div class="gallery-tools"><input id="gallerySearch" type="search" placeholder="⌕ Buscar por nome, classe ou origem..." aria-label="Buscar fichas"><select id="galleryClassFilter" aria-label="Filtrar por classe"><option value="all">Todas as classes</option><option value="Superhumano">Superhumano</option><option value="Nexus">Nexus</option><option value="Humano">Humano</option></select><select id="gallerySort" aria-label="Ordenar fichas"><option value="recent">Mais recentes</option><option value="name">Nome A-Z</option><option value="oldest">Mais antigas</option></select></div><div id="personalSheetsGrid" class="personal-sheets-grid"></div><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button></div></section><section id="campaignWorkspace" class="campaign-workspace hidden"></section>
+    <section class="toolbar" aria-label="Impressão e configurações">
+      <select id="playerSelect" class="hidden" aria-hidden="true" tabindex="-1"></select>
+      <button class="btn primary" id="printPdfBtn" type="button">▤ Imprimir ficha / Salvar PDF</button>
+      <div class="theme-picker" role="group" aria-label="Escolher tema de cores"><span class="theme-label">Tema</span><button class="theme-swatch" type="button" data-theme-choice="roxo" aria-label="Tema roxo" title="Roxo" aria-pressed="false"></button><button class="theme-swatch" type="button" data-theme-choice="vermelho" aria-label="Tema vermelho" title="Vermelho" aria-pressed="false"></button><button class="theme-swatch" type="button" data-theme-choice="amarelo" aria-label="Tema amarelo" title="Amarelo" aria-pressed="false"></button><button class="theme-swatch" type="button" data-theme-choice="preto" aria-label="Tema preto" title="Preto" aria-pressed="false"></button></div>
+      <span class="auth-user" id="authUserLabel"></span><button class="btn small" id="logoutBtn" type="button">Sair</button><div class="save-state"><span class="dot"></span><span id="saveLabel">Conectando...</span></div>
     </section>
 
     <nav class="sheet-tabs" aria-label="Abas da ficha"><button type="button" class="sheet-tab active" data-sheet-tab="main">Ficha</button><button type="button" class="sheet-tab" data-sheet-tab="character">Personagem</button><button type="button" class="sheet-tab" data-sheet-tab="journal">Diário / Missões</button><button type="button" class="sheet-tab" data-sheet-tab="combat">Combate</button></nav>
@@ -838,7 +754,7 @@
               const imported = normalizeCharacter(data); state.players.push(imported); state.activeId = imported.id; activeDie = imported.dice.sides; persist(); render(); showToast('Ficha importada!');
             } else throw new Error('Formato de arquivo não reconhecido.');
           } catch (e) { alert('Não foi possível importar: ' + e.message); }
-          $('importFile').value = '';
+          $('importFile').value = ''; if(appView==='sheets')renderPersonalSheets();
         };
         reader.onerror = () => alert('Não foi possível ler esse arquivo.');
         reader.readAsText(file);
@@ -1056,7 +972,7 @@
          let list=state.players.filter(p=>[p.name,p.className,p.origin].join(' ').toLocaleLowerCase('pt-BR').includes(query)&&(classFilter==='all'||p.className===classFilter));
          list.sort((a,b)=>sort==='name'?String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}):sort==='oldest'?(Number(a.updatedAt)||0)-(Number(b.updatedAt)||0):(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
          const count=$('galleryCount');if(count)count.textContent=list.length+' de '+state.players.length+' ficha(s)';
-         grid.innerHTML=list.map(p=>{const portrait=p.portrait?'<img loading="lazy" src="'+esc(p.portrait)+'" alt="Retrato de '+esc(p.name||'personagem')+'">':'<span class="sheet-placeholder-mark">✦</span>',subtitle=[p.className,p.origin].filter(Boolean).map(esc).join(' · ')||'Classe e origem não definidas',updated=p.updatedAt?new Date(p.updatedAt).toLocaleDateString('pt-BR'):'Ainda não editada',points=Object.values(p.attributes||{}).reduce((n,v)=>n+(Number(v)||0),0)+Object.values(p.skills||{}).reduce((n,v)=>n+(Number(v?.bonus)||0),0);return '<button type="button" class="personal-sheet-card" data-open-personal-sheet="'+esc(p.id)+'"><div class="personal-sheet-art">'+portrait+'<span class="sheet-card-class">'+esc(p.className||'PERSONAGEM')+'</span></div><div class="personal-sheet-info"><strong>'+esc(p.name||'Sem nome')+'</strong><small>'+subtitle+'</small><span class="sheet-card-meta">'+points+' pontos · Editada em '+updated+'</span><span class="sheet-card-open">Abrir ficha <b>↗</b></span></div></button>';}).join('')||'<div class="personal-sheet-empty"><strong>Nenhuma ficha encontrada.</strong><span>'+(state.players.length?'Tente mudar a busca ou o filtro.':'Crie sua primeira ficha para começar a aventura.')+'</span></div>';
+         grid.innerHTML=list.map(p=>{const portrait=p.portrait?'<img loading="lazy" src="'+esc(p.portrait)+'" alt="Retrato de '+esc(p.name||'personagem')+'">':'<span class="sheet-placeholder-mark">✦</span>',subtitle=[p.className,p.origin].filter(Boolean).map(esc).join(' · ')||'Classe e origem não definidas',updated=p.updatedAt?new Date(p.updatedAt).toLocaleDateString('pt-BR'):'Ainda não editada',points=Object.values(p.attributes||{}).reduce((n,v)=>n+(Number(v)||0),0)+Object.values(p.skills||{}).reduce((n,v)=>n+(Number(v?.bonus)||0),0);return '<article class="personal-sheet-card-wrap"><button type="button" class="personal-sheet-card" data-open-personal-sheet="'+esc(p.id)+'"><div class="personal-sheet-art">'+portrait+'<span class="sheet-card-class">'+esc(p.className||'PERSONAGEM')+'</span></div><div class="personal-sheet-info"><strong>'+esc(p.name||'Sem nome')+'</strong><small>'+subtitle+'</small><span class="sheet-card-meta">'+points+' pontos · Editada em '+updated+'</span><span class="sheet-card-open">Abrir ficha <b>↗</b></span></div></button><div class="sheet-card-actions"><button type="button" class="btn small" data-export-sheet="'+esc(p.id)+'">↓ Exportar</button><button type="button" class="btn small" data-duplicate-sheet="'+esc(p.id)+'">⧉ Duplicar</button><button type="button" class="btn danger small" data-delete-sheet="'+esc(p.id)+'">Excluir</button></div></article>';}).join('')||'<div class="personal-sheet-empty"><strong>Nenhuma ficha encontrada.</strong><span>'+(state.players.length?'Tente mudar a busca ou o filtro.':'Crie sua primeira ficha para começar a aventura.')+'</span></div>';
        }
       function renderCampaignList(){const h=$('campaignList');if(!myCampaigns.length){h.innerHTML='<div class="panel-sub">Nenhuma campanha ainda. Crie uma mesa ou entre com um código.</div>';return;}h.innerHTML=myCampaigns.map(c=>'<article class="campaign-card"><strong>'+esc(c.name)+'</strong><small>'+(c.role==='master'?'Você é o mestre':'Você é jogador')+'</small>'+(c.role==='master'?'<div class="campaign-code">'+esc(c.invite_code)+'</div>':'')+'<button class="btn primary small" data-open-campaign="'+esc(c.id)+'">Abrir campanha</button></article>').join('');}
       async function loadMyCampaigns(){if(!currentUser)return;try{const a=await supabase.from('cronica_campaign_members').select('campaign_id,role').eq('user_id',currentUser.id);if(a.error)throw a.error;const ids=(a.data||[]).map(x=>x.campaign_id);if(!ids.length){myCampaigns=[];renderCampaignList();return;}const b=await supabase.from('cronica_campaigns').select('id,name,invite_code,owner_id').in('id',ids);if(b.error)throw b.error;myCampaigns=(b.data||[]).map(c=>({...c,role:a.data.find(m=>m.campaign_id===c.id)?.role||'player'}));renderCampaignList();}catch(err){myCampaigns=[];renderCampaignList();console.warn('Campanhas ainda não configuradas no Supabase:',err.message);}}
@@ -1146,7 +1062,7 @@
       $('gallerySort').addEventListener('change',renderPersonalSheets);
       window.addEventListener('online',()=>{if(currentUser){setSaveStatus('Conexão restaurada · sincronizando...','saving');scheduleCloudSave();}});
       window.addEventListener('offline',()=>{if(currentUser)setSaveStatus('Sem conexão · alterações guardadas localmente','offline');});
-      $('campaignHub').addEventListener('click',e=>{const go=e.target.closest('[data-hub-go]');if(go){if(go.dataset.hubGo==='sheets'){showPersonalSheets();return;}showHubSection(go.dataset.hubGo);return;}if(e.target.closest('[data-hub-back]')){showHubSection('home');return;}const card=e.target.closest('[data-open-personal-sheet]');if(card){switchPlayer(card.dataset.openPersonalSheet);openPersonalSheet();return;}if(e.target.closest('#createSheetFromGallery')){addPlayer();openPersonalSheet();return;}});
+      $('campaignHub').addEventListener('click',e=>{const go=e.target.closest('[data-hub-go]');if(go){if(go.dataset.hubGo==='sheets'){showPersonalSheets();return;}showHubSection(go.dataset.hubGo);return;}if(e.target.closest('[data-hub-back]')){showHubSection('home');return;}const exportCard=e.target.closest('[data-export-sheet]');if(exportCard){const p=state.players.find(x=>x.id===exportCard.dataset.exportSheet);if(p)exportJSON(p,'ficha-'+slug(p.name)+'.json');return;}const duplicateCard=e.target.closest('[data-duplicate-sheet]');if(duplicateCard){switchPlayer(duplicateCard.dataset.duplicateSheet);duplicatePlayer();renderPersonalSheets();return;}const deleteCard=e.target.closest('[data-delete-sheet]');if(deleteCard){switchPlayer(deleteCard.dataset.deleteSheet);deletePlayer();renderPersonalSheets();return;}const card=e.target.closest('[data-open-personal-sheet]');if(card){switchPlayer(card.dataset.openPersonalSheet);openPersonalSheet();return;}if(e.target.closest('#createSheetFromGallery')){addPlayer();openPersonalSheet();return;}});
       $('campaignList').addEventListener('click',e=>{const b=e.target.closest('[data-open-campaign]');if(b)openCampaign(b.dataset.openCampaign).catch(err=>showToast(err.message));});
       $('campaignWorkspace').addEventListener('input',e=>{if(e.target.matches('#rosterSearch'))applyRosterFilters();});
        $('campaignWorkspace').addEventListener('change',e=>{if(e.target.matches('#rosterFilter,#rosterSort'))applyRosterFilters();});
@@ -1172,13 +1088,9 @@
 
       document.querySelector('.theme-picker').addEventListener('click', e => { const btn = e.target.closest('[data-theme-choice]'); if (btn) { applyTheme(btn.dataset.themeChoice); showToast('Tema ' + btn.dataset.themeChoice + ' aplicado!'); } });
       $('playerSelect').addEventListener('change', e => switchPlayer(e.target.value));
-      $('newPlayerBtn').addEventListener('click', addPlayer);
-      $('duplicateBtn').addEventListener('click', duplicatePlayer);
-      $('deleteBtn').addEventListener('click', deletePlayer);
-      $('exportOneBtn').addEventListener('click', () => exportJSON(active(),`ficha-${slug(active().name)}.json`));
-      $('exportAllBtn').addEventListener('click', () => exportJSON({type:'cronica-rpg-backup',version:1,exportedAt:new Date().toISOString(),players:state.players},'backup-cronica-rpg.json'));
-      $('importBtn').addEventListener('click', () => $('importFile').click());
       $('printPdfBtn').addEventListener('click', () => { persist(); window.print(); });
+      $('importSheetsGallery').addEventListener('click', () => $('importFile').click());
+      $('exportAllGallery').addEventListener('click', () => exportJSON({type:'cronica-rpg-backup',version:1,exportedAt:new Date().toISOString(),players:state.players},'backup-cronica-rpg.json'));
       $('importFile').addEventListener('change', e => importFile(e.target.files && e.target.files[0]));
       $('sheet').addEventListener('change', e => {
         const p = active(); const t = e.target;
