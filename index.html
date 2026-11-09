@@ -125,7 +125,7 @@
     .dice-content { padding:17px 19px 19px; }
     .dice-row { display:grid; grid-template-columns:repeat(6,1fr); gap:7px; }
     .die { border:1px solid #50584d; background:#191d19; color:#dfe3d8; border-radius:10px; padding:12px 2px 10px; text-align:center; transition:.15s; }
-    .die strong { display:block; font-family:Georgia,serif; font-size:18px; }
+    .die { min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }\n    .die-silhouette { width:54px; height:54px; display:block; overflow:visible; }\n    .die-outline { fill:none; stroke:currentColor; stroke-width:2.2; stroke-linejoin:round; }\n    .die-facets { fill:none; stroke:currentColor; stroke-width:1.35; stroke-linecap:round; stroke-linejoin:round; opacity:.8; }\n    .die strong { display:block; font-family:Georgia,serif; font-size:18px; }
     .die span { display:block; margin-top:3px; font-size:8px; color:var(--muted); letter-spacing:.08em; }
     .die.active { color:var(--accent-strong); background:rgba(217,194,140,.13); border-color:var(--accent); box-shadow:inset 0 0 0 1px rgba(217,194,140,.14); }
     .roll-controls { display:flex; align-items:end; gap:10px; margin-top:15px; }
@@ -144,8 +144,8 @@
     .roll-die.critical-low .roll-die-shape { background:#d94b55; color:#fff; } .roll-die.critical-high .roll-die-shape { background:#45b879; color:#102319; }
     .roll-die.critical-low .roll-die-value,.roll-die.critical-high .roll-die-value { color:inherit; }
     @media (prefers-reduced-motion:reduce) { .roll-die { animation:none; } }
-    .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:var(--accent); color:var(--accent-ink); clip-path:polygon(50% 1%,91% 25%,98% 72%,67% 99%,22% 91%,2% 51%,15% 12%); filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
-    .roll-die[data-sides="20"] .roll-die-shape { inset:0; clip-path:none; background:none; filter:none; }
+    .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:transparent; color:var(--accent-strong); filter:drop-shadow(0 2px 2px rgba(0,0,0,.15)); }\n    .roll-die-shape .die-silhouette { width:100%; height:100%; }\n    .roll-die-shape .die-outline { fill:rgba(217,194,140,.12); stroke:currentColor; stroke-width:2.1; }\n    .roll-die-shape .die-facets { stroke:currentColor; stroke-width:1.45; }
+    .roll-die[data-sides="20"] .roll-die-shape { inset:0; background:none; filter:none; }
     .d20-svg { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
     .d20-body { fill:var(--accent); stroke:rgba(12,14,12,.9); stroke-width:1.8; stroke-linejoin:round; }
     .d20-facets { fill:none; stroke:rgba(12,14,12,.9); stroke-width:1.55; stroke-linecap:round; stroke-linejoin:round; }
@@ -505,7 +505,7 @@
         'Atletismo','Pontaria','Furtividade','Sobrevivência','Percepção','Iniciativa','Investigação','Medicina','Ocultismo','Tecnologia',
         'Diplomacia','Intimidação','Persuasão','Pilotagem','Pilotagem (Veículo)','Trabalho em Equipe','Truques','Conhecimento','Reflexos','Ofício'
       ];
-      const DICE = [20,12,10,6,4,2];
+      const DICE = [20,12,10,100,8,6,4];
       const $ = (id) => document.getElementById(id);
       let toastTimer;
       let activeSheetTab = 'main';
@@ -580,6 +580,19 @@
       const totalPoints = (p) => attributePoints(p) + skillPoints(p);
       const remaining = (p) => Math.max(0, 28 - totalPoints(p));
       const fmtTime = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      function dieSilhouette(sides){
+        const shapes={
+          20:'<path class="die-outline" d="M50 2 92 24 92 68 70 91 50 99 30 91 8 68 8 24Z"/><path class="die-facets" d="M50 2 28 38 72 38ZM8 24 28 38 8 68M92 24 72 38 92 68M28 38 72 38 50 78 28 38M8 68 50 78 50 99M92 68 50 78M8 68 92 68"/>',
+          12:'<path class="die-outline" d="M50 3 78 10 96 35 91 70 68 94 32 94 9 70 4 35 22 10Z"/><path class="die-facets" d="M50 3 50 34 22 10M50 34 78 10M4 35 30 48 9 70M96 35 70 48 91 70M30 48 50 34 70 48 50 78ZM9 70 50 78 32 94M91 70 50 78 68 94"/>',
+          10:'<path class="die-outline" d="M50 3 91 80 50 98 9 80Z"/><path class="die-facets" d="M50 3 50 63 9 80M50 63 91 80M50 3 9 80M50 3 91 80"/>',
+          100:'<path class="die-outline" d="M50 3 91 80 50 98 9 80Z"/><path class="die-facets" d="M50 3 50 63 9 80M50 63 91 80M50 3 9 80M50 3 91 80"/>',
+          8:'<path class="die-outline" d="M50 3 94 50 50 97 6 50Z"/><path class="die-facets" d="M50 3 50 50 6 50M50 3 94 50 50 50M6 50 50 97 50 50M94 50 50 97"/>',
+          6:'<rect class="die-outline" x="8" y="8" width="84" height="84" rx="3"/><rect class="die-facets" x="15" y="15" width="70" height="70" rx="1"/>',
+          4:'<path class="die-outline" d="M50 4 96 91 4 91Z"/><path class="die-facets" d="M50 4 50 91M4 91 50 55 96 91"/>'
+        };
+        return '<svg class="die-silhouette" viewBox="0 0 100 100" aria-hidden="true">'+(shapes[sides]||shapes[20])+'</svg>';
+      }
+
 
       function persist() {
         try {
@@ -624,24 +637,7 @@
         let result = '';
         if (p.lastResult && Array.isArray(p.lastResult.results)) {
           const diceResults = Array.isArray(p.lastResult.diceResults) ? p.lastResult.diceResults : p.lastResult.results.map(value => ({sides:p.dice.sides || 20,value}));
-          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape">${sides===20?`<svg class="d20-svg" viewBox="0 0 100 100" aria-hidden="true"><path class="d20-body" d="M50 2 L92 24 L92 68 L70 91 L50 99 L30 91 L8 68 L8 24 Z"/><path class="d20-facets" d="M50 2 L28 38 L72 38 Z M8 24 L28 38 L8 68 L8 68 M92 24 L72 38 L92 68 M28 38 L72 38 M28 38 L50 78 L72 38 M8 68 L28 38 M92 68 L72 38 M8 68 L50 78 L50 99 M92 68 L50 78 L50 99 M8 68 L50 78 L92 68 M30 91 L50 99 L70 91"/></svg>`:'' }<span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
-          result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
-        }
-        const diaryRows=p.diary.map((entry,i)=>'<article class="roster-card"><small>'+new Date(entry.timestamp||Date.now()).toLocaleString('pt-BR')+'</small><textarea data-diary-text data-index="'+i+'" maxlength="1200">'+esc(entry.text||'')+'</textarea><button class="btn danger small" data-action="remove-diary" data-index="'+i+'">Remover registro</button></article>').join('')||'<div class="panel-sub">O diário ainda está em branco.</div>';
-        const questRows=p.quests.map((q,i)=>'<article class="roster-card"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-quest-done data-index="'+i+'" '+(q.done?'checked':'')+'><strong>'+esc(q.name||'Missão sem título')+'</strong></label><textarea data-quest-description data-index="'+i+'" maxlength="600" placeholder="Objetivos e detalhes">'+esc(q.description||'')+'</textarea><button class="btn danger small" data-action="remove-quest" data-index="'+i+'">Remover missão</button></article>').join('')||'<div class="panel-sub">Nenhuma missão registrada.</div>';
-        const extraPanels='<section class="panel extra-tab-panel journal-panel '+(activeSheetTab==='journal'?'':'hidden')+'" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Diário e missões</h2><span class="panel-sub">Memórias, pistas e objetivos</span></div><div style="padding:16px;display:grid;gap:18px"><div><div class="panel-head" style="padding:0 0 10px"><h3 class="panel-title">Diário de campanha</h3><button class="btn small" data-action="add-diary">＋ Registrar acontecimento</button></div><div class="campaign-roster">'+diaryRows+'</div></div><div><div class="panel-head" style="padding:0 0 10px"><h3 class="panel-title">Missões</h3><button class="btn small" data-action="add-quest">＋ Nova missão</button></div><div class="campaign-roster">'+questRows+'</div></div></div></section><section class="panel extra-tab-panel combat-panel '+(activeSheetTab==='combat'?'':'hidden')+'" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Modo de combate</h2><span class="panel-sub">Consulta rápida durante a sessão</span></div><div style="padding:16px;display:grid;gap:14px"><div class="campaign-roster"><article class="roster-card"><small>VIDA</small><h2>'+esc((p.hpCurrent??p.hp??0)+' / '+(p.hpMax||0))+'</h2></article><article class="roster-card"><small>ESFORÇO</small><h2>'+esc((p.effortCurrent||0)+' / '+(p.effortMax||0))+'</h2></article><article class="roster-card"><small>SANIDADE</small><h2>'+Number(p.sanity??100)+'%</h2></article>'+(p.className==='Nexus'?'<article class="roster-card"><small>MAGICULA</small><h2>'+Number(p.magicula??100)+'%</h2></article>':'')+'</div><div class="panel-sub">Condições ativas</div><div class="campaign-roster">'+conditionCards+'</div><button class="btn primary" type="button" data-action="combat-back">Voltar à ficha</button></div></section>';
-        $('sheet').innerHTML = `
-          <div class="main-tab-panel ${activeSheetTab==='main'?'':'hidden'}" style="display:contents">
-          <div class="left-stack">
-            <section class="panel">
-              <div class="panel-head"><h2 class="panel-title">Identificação</h2><span class="panel-sub">Dados do personagem</span></div>
-              <div class="identity"><div class="identity-grid">
-                <div class="field name"><label for="charName">Nome do personagem</label><input id="charName" type="text" maxlength="70" placeholder="Nome" value="${esc(p.name)}" data-field="name"></div>
-                <div class="field"><label for="charAge">Idade</label><input id="charAge" type="text" maxlength="12" placeholder="—" value="${esc(p.age)}" data-field="age"></div>
-                <div class="field"><label for="charHeight">Altura</label><input id="charHeight" type="text" maxlength="16" placeholder="—" value="${esc(p.height)}" data-field="height"></div>
-                <div class="field"><label for="charWeight">Peso</label><input id="charWeight" type="text" maxlength="16" placeholder="—" value="${esc(p.weight)}" data-field="weight"></div>
-                <div class="field origin"><label for="charOrigin">Origem</label><input id="charOrigin" type="text" maxlength="70" placeholder="Origem" value="${esc(p.origin)}" data-field="origin"></div>
-                <div class="field class"><label for="charClass">Classe</label><select id="charClass" data-field="className"><option value="" ${!p.className?'selected':''}>Selecione uma classe</option><option value="Superhumano" ${p.className==='Superhumano'?'selected':''}>Superhumano</option><option value="Nexus" ${p.className==='Nexus'?'selected':''}>Nexus</option><option value="Humano" ${p.className==='Humano'?'selected':''}>Humano</option></select></div>
+          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape">${dieSilhouette(sides)}>Selecione uma classe</option><option value="Superhumano" ${p.className==='Superhumano'?'selected':''}>Superhumano</option><option value="Nexus" ${p.className==='Nexus'?'selected':''}>Nexus</option><option value="Humano" ${p.className==='Humano'?'selected':''}>Humano</option></select></div>
                 <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / 28 gastos</div></div>
               </div></div>
             </section>
@@ -663,7 +659,7 @@
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Rolador de dados</h2><span class="panel-sub">A sorte está lançada</span></div>
               <div class="dice-content">
-                <div class="dice-row">${DICE.map(s => `<button type="button" class="die ${activeDie===s?'active':''}" data-die="${s}" aria-pressed="${activeDie===s}"><strong>D${s}</strong><span>${s===2?'MOEDA': 'DADO'}</span></button>`).join('')}</div>
+                <div class="dice-row">${DICE.map(s => `<button type="button" class="die ${activeDie===s?'active':''}" data-die="${s}" aria-pressed="${activeDie===s}">${dieSilhouette(s)}<strong>${s===100?'D%':'D'+s}</strong></button>`).join('')}</div>
                 <div class="roll-controls" style="display:block">
                   <div class="field"><label for="diceExpression">Expressão de rolagem</label><input id="diceExpression" type="text" placeholder="Ex.: 1d20 + 1d12 + 10" value="${esc(p.dice.expression || `${p.dice.quantity}d${activeDie}`)}" /></div>
                   <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
@@ -738,17 +734,17 @@
       function roll() {
         const p = active();
         const expression = ($('diceExpression')?.value || '').replace(/\s+/g,'');
-        if (!expression || !/^(?:\d+d(?:20|12|10|6|4|2)|\d+)(?:[+-](?:\d+d(?:20|12|10|6|4|2)|\d+))*$/i.test(expression)) {
+        if (!expression || !/^(?:\d+d(?:100|20|12|10|8|6|4|2)|\d+)(?:[+-](?:\d+d(?:100|20|12|10|8|6|4|2)|\d+))*$/i.test(expression)) {
           showToast('Expressão inválida. Exemplo: 1d20 + 1d12 + 10'); return;
         }
         const mode = p.dice.mode === 'highest' ? 'highest' : 'sum';
-        const tokens = expression.match(/[+-]?\d+d(?:20|12|10|6|4|2)|[+-]?\d+/ig) || [];
+        const tokens = expression.match(/[+-]?\d+d(?:100|20|12|10|8|6|4|2)|[+-]?\d+/ig) || [];
         let diceSum = 0; let modifierTotal = 0;
         const results = []; const diceResults = []; const signedDice = []; const detail = [];
         for (const token of tokens) {
           const sign = token[0] === '-' ? -1 : 1;
           const part = token.replace(/^[+-]/,'');
-          const dice = part.match(/^(\d+)d(20|12|10|6|4|2)$/i);
+          const dice = part.match(/^(\d+)d(100|20|12|10|8|6|4|2)$/i);
           if (dice) {
             const count = Number(dice[1]), sides = Number(dice[2]);
             if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
