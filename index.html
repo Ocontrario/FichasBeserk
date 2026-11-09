@@ -174,9 +174,23 @@
     .toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%,20px); opacity:0; pointer-events:none; padding:11px 15px; color:#1d2019; background:var(--accent-strong); border-radius:10px; font-size:12px; font-weight:800; box-shadow:var(--shadow); transition:.2s; z-index:20; }
     .toast.show { opacity:1; transform:translate(-50%,0); }
     .hidden { display:none !important; }
-    .sheet-tabs { display:flex; gap:8px; margin-bottom:10px; }
-    .sheet-tab { border:1px solid var(--line); background:var(--panel); color:var(--muted); border-radius:9px; padding:9px 15px; font-weight:800; font-size:12px; }
-    .sheet-tab.active { color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
+    .sheet-tabs { display:flex; align-items:center; gap:5px; width:max-content; max-width:100%; margin:0 0 18px; padding:5px; overflow-x:auto; border:1px solid var(--line-soft); border-radius:12px; background:rgba(15,18,15,.48); scrollbar-width:thin; }
+    .sheet-tab { flex:0 0 auto; min-width:112px; border:1px solid transparent; background:transparent; color:var(--muted); border-radius:8px; padding:10px 17px; font-weight:700; font-size:12px; letter-spacing:.015em; transition:background .18s,border-color .18s,color .18s; white-space:nowrap; }
+    .sheet-tab:hover { color:var(--text); background:rgba(255,255,255,.035); }
+    .sheet-tab.active { color:var(--accent-strong); background:var(--panel-2); border-color:var(--line); box-shadow:0 2px 8px rgba(0,0,0,.16); }
+    .sheet-tab:focus-visible { outline:2px solid var(--accent-strong); outline-offset:2px; }
+    .layout { gap:16px; }
+    .left-stack, .right-stack { gap:16px; }
+    .panel-head { gap:10px; padding:15px 17px 13px; }
+    .identity { padding:17px; }
+    .attributes { padding:10px 16px 16px; }
+    @media(max-width:700px) {
+      .sheet-tabs { width:100%; margin-bottom:14px; }
+      .sheet-tab { flex:1 0 auto; min-width:0; padding:10px 13px; }
+      .layout, .left-stack, .right-stack { gap:12px; }
+      .panel-head { padding:13px 14px 11px; }
+      .identity { padding:14px; }
+    }
     .resource-list { display:grid; gap:12px; padding:12px 16px 15px; }
     .resource-card { --resource-color:#d94b55; display:grid; gap:7px; }
     .resource-card.sanity { --resource-color:#a979e8; } .resource-card.effort { --resource-color:#e69a43; }
