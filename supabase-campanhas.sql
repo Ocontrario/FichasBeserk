@@ -121,7 +121,7 @@ create policy "initiative update by master or self" on public.cronica_campaign_i
 for update to authenticated using (
   public.cronica_is_campaign_master(campaign_id) or user_id = auth.uid()
 ) with check (
-  public.cronica_is_campaign_master(campaign_id) or (user_id = auth.uid() and is_npc = false)
+  public.cronica_is_campaign_master(campaign_id) or (user_id = auth.uid() and is_npc = false and public.cronica_is_campaign_member(campaign_id))
 );
 
 drop policy if exists "initiative delete by master or self" on public.cronica_campaign_initiative;
