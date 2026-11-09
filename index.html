@@ -711,8 +711,8 @@
                   <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
                   <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}" ${(p.dice.testAttribute||'forca')===key?'selected':''}>${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
-                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste (4+ pontos)</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3 dados e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2 dados e somar</option></select></div>
-                  <div class="die-summary">O teste usa o dado selecionado acima. Com menos de 4 pontos, a quantidade de dados acompanha o atributo. Com 4 ou mais, escolha um estilo especial.</div>
+                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste (3+ pontos)</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3 dados e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2 dados e somar</option></select></div>
+                  <div class="die-summary">O teste usa o dado selecionado acima. Com menos de 3 pontos, a quantidade de dados acompanha o atributo. Com 3 ou mais, escolha um estilo especial.</div>
                   <button type="button" class="btn primary roll-btn" id="attributeTestBtn" style="margin-bottom:12px">⚔ Fazer teste de atributo</button>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
                 </div>
@@ -840,7 +840,7 @@
         let detail = '';
         let style = 'normal';
 
-        if (points < 4) {
+        if (points < 3) {
           rolls = Array.from({length:points}, () => secureRandom(sides));
           total = rolls.reduce((a,b) => a+b, 0);
           diceResults = rolls.map(value => ({sides,value,kept:true}));
