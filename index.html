@@ -533,7 +533,7 @@
         'Atletismo','Pontaria','Furtividade','Sobrevivência','Percepção','Iniciativa','Investigação','Medicina','Ocultismo','Tecnologia',
         'Diplomacia','Intimidação','Persuasão','Pilotagem','Pilotagem (Veículo)','Trabalho em Equipe','Truques','Conhecimento','Reflexos','Ofício'
       ];
-      const DICE = [100,20,12,10,6,4,2];
+      const DICE = [100,20,12,10,8,6,4,2];
       const $ = (id) => document.getElementById(id);
       let toastTimer;
       let activeSheetTab = 'main';
@@ -771,17 +771,17 @@
       function roll() {
         const p = active();
         const expression = ($('diceExpression')?.value || '').replace(/\s+/g,'');
-        if (!expression || !/^(?:\d+d(?:100|20|12|10|6|4|2)|\d+)(?:[+-](?:\d+d(?:100|20|12|10|6|4|2)|\d+))*$/i.test(expression)) {
+        if (!expression || !/^(?:\d+d(?:100|20|12|10|8|6|4|2)|\d+)(?:[+-](?:\d+d(?:100|20|12|10|8|6|4|2)|\d+))*$/i.test(expression)) {
           showToast('Expressão inválida. Exemplo: 1d20 + 1d12 + 10'); return;
         }
         const mode = p.dice.mode === 'highest' ? 'highest' : 'sum';
-        const tokens = expression.match(/[+-]?\d+d(?:100|20|12|10|6|4|2)|[+-]?\d+/ig) || [];
+        const tokens = expression.match(/[+-]?\d+d(?:100|20|12|10|8|6|4|2)|[+-]?\d+/ig) || [];
         let diceSum = 0; let modifierTotal = 0;
         const results = []; const diceResults = []; const signedDice = []; const detail = [];
         for (const token of tokens) {
           const sign = token[0] === '-' ? -1 : 1;
           const part = token.replace(/^[+-]/,'');
-          const dice = part.match(/^(\d+)d(100|20|12|10|6|4|2)$/i);
+          const dice = part.match(/^(\d+)d(100|20|12|10|8|6|4|2)$/i);
           if (dice) {
             const count = Number(dice[1]), sides = Number(dice[2]);
             if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
