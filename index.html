@@ -586,7 +586,7 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           lastSavedAt = Date.now();
           $('saveLabel').textContent = currentUser ? 'Salvando na nuvem...' : 'Salvo neste navegador';
-          if (currentUser) scheduleCloudSave();
+          if (currentUser) { scheduleCloudSave(); if(activeCampaign) scheduleCampaignSync(); }
           return true;
         } catch (e) {
           $('saveLabel').textContent = 'Falha ao salvar';
@@ -803,6 +803,7 @@
         document.body.classList.add('authenticated');
         $('authUserLabel').textContent = '@' + (currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
         $('saveLabel').textContent = 'Sincronizado com a nuvem';
+        await loadMyCampaigns(); showCampaignHub();
       }
       async function syncCloudNow() {
         if (!currentUser || cloudBusy) { cloudAgain = true; return; }
@@ -853,6 +854,16 @@
           await supabase.auth.signOut();
         }
       }
+
+      function showCampaignHub(){appView='hub';activeCampaign=null;$('campaignHub').classList.remove('hidden');$('campaignWorkspace').classList.add('hidden');document.querySelector('.toolbar').classList.add('hidden');document.querySelector('.sheet-tabs').classList.add('hidden');$('sheet').classList.add('hidden');document.querySelector('.footer-note').classList.add('hidden');renderCampaignList();}
+      function openPersonalSheet(){appView='sheet';$('campaignHub').classList.add('hidden');$('campaignWorkspace').classList.add('hidden');document.querySelector('.toolbar').classList.remove('hidden');document.querySelector('.sheet-tabs').classList.remove('hidden');$('sheet').classList.remove('hidden');document.querySelector('.footer-note').classList.remove('hidden');render();if(activeCampaign)scheduleCampaignSync();}
+      function renderCampaignList(){const h=$('campaignList');if(!myCampaigns.length){h.innerHTML='<div class="panel-sub">Nenhuma campanha ainda. Crie uma mesa ou entre com um código.</div>';return;}h.innerHTML=myCampaigns.map(c=>'<article class="campaign-card"><strong>'+esc(c.name)+'</strong><small>'+(c.role==='master'?'Você é o mestre':'Você é jogador')+'</small>'+(c.role==='master'?'<div class="campaign-code">'+esc(c.invite_code)+'</div>':'')+'<button class="btn primary small" data-open-campaign="'+esc(c.id)+'">Abrir campanha</button></article>').join('');}
+      async function loadMyCampaigns(){if(!currentUser)return;const a=await supabase.from('cronica_campaign_members').select('campaign_id,role').eq('user_id',currentUser.id);if(a.error)throw a.error;const ids=(a.data||[]).map(x=>x.campaign_id);if(!ids.length){myCampaigns=[];renderCampaignList();return;}const b=await supabase.from('cronica_campaigns').select('id,name,invite_code,owner_id').in('id',ids);if(b.error)throw b.error;myCampaigns=(b.data||[]).map(c=>({...c,role:a.data.find(m=>m.campaign_id===c.id)?.role||'player'}));renderCampaignList();}
+      async function refreshCampaignRoster(){if(!activeCampaign)return;const r=await supabase.from('cronica_campaign_snapshots').select('user_id,character_data,updated_at').eq('campaign_id',activeCampaign.id).order('updated_at',{ascending:false});if(r.error)throw r.error;campaignRoster=r.data||[];}
+      async function openCampaign(id){const c=myCampaigns.find(x=>x.id===id);if(!c)return;activeCampaign=c;appView='campaign';$('campaignHub').classList.add('hidden');$('campaignWorkspace').classList.remove('hidden');document.querySelector('.toolbar').classList.add('hidden');document.querySelector('.sheet-tabs').classList.add('hidden');$('sheet').classList.add('hidden');document.querySelector('.footer-note').classList.add('hidden');await refreshCampaignRoster();renderCampaignWorkspace();}
+      function renderCampaignWorkspace(){if(!activeCampaign)return;const master=activeCampaign.role==='master';const cards=campaignRoster.map(row=>{const p=row.character_data||{};const hp=Number(p.hpCurrent??p.hp)||0,hm=Number(p.hpMax)||0;const cs=Array.isArray(p.conditions)?p.conditions.map(x=>typeof x==='string'?x:x.name).filter(Boolean):[];return '<article class="roster-card"><div class="panel-sub">PERSONAGEM</div><h3>'+esc(p.name||'Sem nome')+'</h3><div class="panel-sub">'+esc(p.className||'Classe não definida')+' · '+esc(p.origin||'Origem não definida')+'</div><div class="roster-stats"><div class="roster-stat"><b>'+(hm?hp+'/'+hm:'—')+'</b>Vida</div><div class="roster-stat"><b>'+Number(p.sanity??100)+'%</b>Sanidade</div><div class="roster-stat"><b>'+cs.length+'</b>Condições</div></div><small>Atualizado '+new Date(row.updated_at).toLocaleString('pt-BR')+'</small></article>';}).join('');$('campaignWorkspace').innerHTML='<div class="campaign-workspace-head"><div><div class="eyebrow">'+(master?'Painel do mestre':'Área do jogador')+'</div><h2 style="margin:4px 0;font:700 24px Georgia,serif">'+esc(activeCampaign.name)+'</h2><div class="panel-sub">'+(master?'Visão geral dos personagens vinculados à mesa.':'Sua ficha compartilhada com o mestre.')+'</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="refreshCampaign">↻ Atualizar</button><button class="btn small" id="backCampaignHub">Minhas campanhas</button></div></div>'+(master?'<div class="campaign-code">Convite: '+esc(activeCampaign.invite_code)+'</div><p class="panel-sub">Compartilhe o código com os jogadores. Não compartilhe sua senha.</p>':'')+'<div class="campaign-roster">'+(cards||'<div class="panel-sub">Nenhuma ficha vinculada. Abra sua ficha e use “Vincular ficha ativa”.</div>')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"><button class="btn primary" id="openCampaignSheet">Abrir minha ficha</button><button class="btn" id="linkCampaignCharacter">Vincular ficha ativa</button></div>';}
+      async function linkActiveCharacterToCampaign(){if(!activeCampaign)return;const r=await supabase.from('cronica_campaign_snapshots').upsert({campaign_id:activeCampaign.id,user_id:currentUser.id,character_data:active(),updated_at:new Date().toISOString()},{onConflict:'campaign_id,user_id'});if(r.error){showToast('Falha ao vincular: '+r.error.message);return;}await refreshCampaignRoster();renderCampaignWorkspace();showToast('Ficha vinculada à campanha!');}
+      function scheduleCampaignSync(){clearTimeout(campaignTimer);campaignTimer=setTimeout(async()=>{if(!activeCampaign||!currentUser||appView!=='sheet')return;const r=await supabase.from('cronica_campaign_snapshots').upsert({campaign_id:activeCampaign.id,user_id:currentUser.id,character_data:active(),updated_at:new Date().toISOString()},{onConflict:'campaign_id,user_id'});if(r.error){console.error(r.error);$('saveLabel').textContent='Erro ao compartilhar';}else $('saveLabel').textContent='Ficha sincronizada com a campanha';},900);}
       $('authSwitch').addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
       $('authForm').addEventListener('submit', async event => {
         event.preventDefault();
@@ -881,10 +892,16 @@
           $('authSubmit').textContent = authMode === 'signup' ? 'Criar conta' : 'Entrar';
         }
       });
+
+      $('createCampaignForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await supabase.rpc('cronica_create_campaign',{p_name:$('newCampaignName').value.trim()});if(r.error)throw r.error;await loadMyCampaigns();$('newCampaignName').value='';if(r.data&&r.data[0])await openCampaign(r.data[0].id);showToast('Campanha criada!');}catch(err){showToast('Erro: '+err.message);}});
+      $('joinCampaignForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await supabase.rpc('cronica_join_campaign',{p_code:$('joinCampaignCode').value.trim().toUpperCase()});if(r.error)throw r.error;await loadMyCampaigns();$('joinCampaignCode').value='';if(r.data&&r.data[0])await openCampaign(r.data[0].id);showToast('Você entrou na campanha!');}catch(err){showToast('Erro: '+err.message);}});
+      $('openPersonalSheet').addEventListener('click',openPersonalSheet);
+      $('campaignList').addEventListener('click',e=>{const b=e.target.closest('[data-open-campaign]');if(b)openCampaign(b.dataset.openCampaign).catch(err=>showToast(err.message));});
+      $('campaignWorkspace').addEventListener('click',async e=>{if(e.target.closest('#backCampaignHub')){showCampaignHub();return;}if(e.target.closest('#refreshCampaign')){try{await refreshCampaignRoster();renderCampaignWorkspace();}catch(err){showToast(err.message);}return;}if(e.target.closest('#openCampaignSheet')){openPersonalSheet();return;}if(e.target.closest('#linkCampaignCharacter')){await linkActiveCharacterToCampaign();}});
       $('logoutBtn').addEventListener('click', async () => {
         await syncCloudNow();
         await supabase.auth.signOut();
-        currentUser = null; cloudIds = new Set();
+        currentUser = null; cloudIds = new Set(); myCampaigns=[]; activeCampaign=null;
         try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
         document.body.classList.remove('authenticated');
         $('authPassword').value = ''; $('authUsername').value = ''; setAuthMode('login');
