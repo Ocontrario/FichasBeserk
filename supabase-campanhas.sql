@@ -66,6 +66,10 @@ drop policy if exists "campaigns update by owner" on public.cronica_campaigns;
 create policy "campaigns update by owner" on public.cronica_campaigns
 for update to authenticated using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 
+drop policy if exists "campaigns delete by owner" on public.cronica_campaigns;
+create policy "campaigns delete by owner" on public.cronica_campaigns
+for delete to authenticated using (owner_id = auth.uid());
+
 drop policy if exists "members readable by self or master" on public.cronica_campaign_members;
 create policy "members readable by self or master" on public.cronica_campaign_members
 for select to authenticated using (
