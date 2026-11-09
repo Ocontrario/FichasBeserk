@@ -492,6 +492,19 @@
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script>
+    // Mostra erros de inicialização que antes deixavam a tela de login sem resposta.
+    window.addEventListener('error', event => {
+      const box = document.getElementById('authError');
+      if (box) box.textContent = 'Erro ao iniciar o site: ' + (event.message || 'falha no JavaScript') + '. Atualize a página e, se continuar, envie uma captura desta mensagem.';
+      const button = document.getElementById('authSubmit');
+      if (button) { button.disabled = false; button.textContent = 'Entrar'; }
+    });
+    window.addEventListener('unhandledrejection', event => {
+      const box = document.getElementById('authError');
+      if (box) box.textContent = 'Erro inesperado: ' + (event.reason?.message || String(event.reason || 'falha desconhecida'));
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     (() => {
