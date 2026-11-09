@@ -894,7 +894,7 @@
       $('importFile').addEventListener('change', e => importFile(e.target.files && e.target.files[0]));
       $('sheet').addEventListener('change', e => {
         const p = active(); const t = e.target;
-        if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
+        if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait','className'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
         if (t.dataset.inventoryField) { const item=p.inventory[Number(t.dataset.index)]; if(item){item[t.dataset.inventoryField]=t.value;persist();if(t.dataset.inventoryField==='type')render();} }
         if (t.dataset.condition !== undefined) { p.conditions[Number(t.dataset.condition)]=t.value; persist(); }
