@@ -599,7 +599,8 @@
                 <div class="dice-row">${DICE.map(s => `<button type="button" class="die ${activeDie===s?'active':''}" data-die="${s}" aria-pressed="${activeDie===s}"><strong>D${s}</strong><span>${s===2?'MOEDA': 'DADO'}</span></button>`).join('')}</div>
                 <div class="roll-controls" style="display:block">
                   <div class="field"><label for="diceExpression">Expressão de rolagem</label><input id="diceExpression" type="text" placeholder="Ex.: 1d20 + 1d12 + 10" value="${esc(p.dice.expression || `${p.dice.quantity}d${activeDie}`)}" /></div>
-                  <div class="die-summary">Use dados diferentes e modificadores. Ex.: <strong style="color:var(--accent-strong)">1d20 + 1d12 + 10</strong></div>
+                  <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
+                  <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
                 </div>
                 ${result}
@@ -664,8 +665,10 @@
         if (!expression || !/^(?:\d+d(?:20|12|10|6|4|2)|\d+)(?:[+-](?:\d+d(?:20|12|10|6|4|2)|\d+))*$/i.test(expression)) {
           showToast('Expressão inválida. Exemplo: 1d20 + 1d12 + 10'); return;
         }
+        const mode = p.dice.mode === 'highest' ? 'highest' : 'sum';
         const tokens = expression.match(/[+-]?\d+d(?:20|12|10|6|4|2)|[+-]?\d+/ig) || [];
-        let total = 0; const results = []; const detail = [];
+        let diceSum = 0; let modifierTotal = 0;
+        const results = []; const signedDice = []; const detail = [];
         for (const token of tokens) {
           const sign = token[0] === '-' ? -1 : 1;
           const part = token.replace(/^[+-]/,'');
@@ -674,11 +677,20 @@
             const count = Number(dice[1]), sides = Number(dice[2]);
             if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
             const rolls = Array.from({length:count},() => secureRandom(sides));
-            const subtotal = rolls.reduce((a,b)=>a+b,0) * sign; total += subtotal;
+            diceSum += rolls.reduce((a,b)=>a+b,0) * sign;
+            signedDice.push(...rolls.map(value => value * sign));
             results.push(...rolls); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
-          } else { const n = Number(part) * sign; total += n; detail.push(`${n>=0?'+':''}${n}`); }
+          } else {
+            const n = Number(part) * sign;
+            modifierTotal += n;
+            detail.push(`${n>=0?'+':''}${n}`);
+          }
         }
-        const entry = {expression:expression.replace(/([+-])/g,' $1 ').trim(),results,total,timestamp:Date.now(),detail:detail.join(' | ')};
+        const total = mode === 'highest'
+          ? (signedDice.length ? Math.max(...signedDice) : 0) + modifierTotal
+          : diceSum + modifierTotal;
+        const label = mode === 'highest' ? 'Perícia' : 'Dano';
+        const entry = {expression:`${label}: ${expression.replace(/([+-])/g,' $1 ').trim()}`,mode,results,total,timestamp:Date.now(),detail:detail.join(' | ')};
         p.lastResult = entry; p.history.unshift(entry); p.history = p.history.slice(0,20);
         persist(); render();
       }
@@ -850,6 +862,7 @@
       $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
       $('sheet').addEventListener('change', e => {
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
+        if (e.target.id === 'rollMode') { active().dice.mode = e.target.value === 'highest' ? 'highest' : 'sum'; persist(); }
       });
       $('sheet').addEventListener('keydown', e => { if (e.target.id === 'diceExpression' && e.key === 'Enter') roll(); });
       // A ficha só é exibida depois que uma conta autenticada carregar seus próprios personagens.
