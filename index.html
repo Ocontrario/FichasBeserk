@@ -639,7 +639,7 @@
           </div>
           <div class="right-stack">
             <section class="panel">
-              <div class="panel-head"><h2 class="panel-title">Pontos de vida</h2><span class="panel-sub">Vida máxima e atual</span></div>
+              <div class="panel-head"><h2 class="panel-title">Recursos do personagem</h2><span class="panel-sub">Vida, esforço e sanidade</span></div>
               <div class="resource-list">${(()=>{const hm=Math.max(0,Number(p.hpMax)||0),hc=Math.max(0,Math.min(hm,Number(p.hpCurrent!==undefined?p.hpCurrent:p.hp)||0)),em=Math.max(0,Number(p.effortMax)||0),ec=Math.max(0,Math.min(em,Number(p.effortCurrent)||0)),hp=hm?Math.round(hc/hm*100):0,ep=em?Math.round(ec/em*100):0;return `<div class="resource-card"><div class="resource-head"><span>♥ Vida</span><span class="resource-values"><input type="number" min="0" max="9999" value="${esc(p.hpCurrent??p.hp??'')}" data-field="hpCurrent" aria-label="Vida atual"> / <input type="number" min="0" max="9999" value="${esc(p.hpMax)}" data-field="hpMax" aria-label="Vida máxima"></span></div><div class="resource-track"><div class="resource-fill" style="width:${hp}%"></div></div><div class="resource-percent">${hp}%</div></div><div class="resource-card effort"><div class="resource-head"><span>⚡ Esforço</span><span class="resource-values"><input type="number" min="0" max="9999" value="${esc(p.effortCurrent)}" data-field="effortCurrent"> / <input type="number" min="0" max="9999" value="${esc(p.effortMax)}" data-field="effortMax"></span></div><div class="resource-track"><div class="resource-fill" style="width:${ep}%"></div></div><div class="resource-percent">${ep}%</div></div>${`<div class="resource-card sanity"><div class="resource-head"><span>Sanidade</span><span class="resource-values"><input type="number" min="0" max="100" value="${Number(p.sanity??100)}" data-field="sanity">%</span></div><div class="resource-track"><div class="resource-fill" style="width:${Number(p.sanity??100)}%"></div></div></div>`}${p.className==='Nexus'?`<div class="resource-card sanity"><div class="resource-head"><span>Magicula</span><span class="resource-values"><input type="number" min="0" max="100" value="${Number(p.magicula??100)}" data-field="magicula">%</span></div><div class="resource-track"><div class="resource-fill" style="width:${Number(p.magicula??100)}%"></div></div></div>`:''}`})()}</div>
             </section>
             <section class="panel">
@@ -661,7 +661,7 @@
               </div>
             </section>
           </div>
-                      <section class="panel">
+                      <section class="panel" style="grid-column:1/-1">
                         <div class="panel-head"><h2 class="panel-title">Inventário</h2><span class="panel-sub">Organize seus itens por categoria</span></div>
                         <div class="equipment"><div class="inventory-filters">${[{id:'all',label:'Ver todos'},...inventoryTypes].map(t=>`<button type="button" class="inventory-filter ${inventoryFilter===t.id?'active':''}" data-inventory-filter="${t.id}">${t.label}</button>`).join('')}</div>${equipment}<div class="equip-footer"><span>Itens organizados por categoria.</span><span>${(p.inventory||[]).length}/100 itens</span></div><button type="button" class="btn primary small" data-action="add-inventory">＋ Adicionar item</button></div>
                       </section>
