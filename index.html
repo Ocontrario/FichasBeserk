@@ -589,6 +589,9 @@
       }
       function render() {
         const p = active();
+        if(!Array.isArray(p.inventory)) p.inventory=(p.equipment||[]).filter(x=>String(x||'').trim()).map(x=>({name:String(x),type:'general',weaponType:'',damage:'',range:'',description:'',editing:false}));
+        if(!Array.isArray(p.conditions)) p.conditions=[];
+        if(p.sanity===undefined)p.sanity=100; if(p.magicula===undefined)p.magicula=100;
         $('playerSelect').innerHTML = state.players.map(x => `<option value="${esc(x.id)}" ${x.id===state.activeId?'selected':''}>${esc(x.name || 'Sem nome')}</option>`).join('');
         const attrs = ATTRIBUTES.map(([key,label,desc]) => `
           <div class="attribute-row">
@@ -612,6 +615,7 @@
           result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         $('sheet').innerHTML = `
+          <div class="main-tab-panel" style="display:contents">
           <div class="left-stack">
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Identificação</h2><span class="panel-sub">Dados do personagem</span></div>
@@ -658,7 +662,8 @@
               </div>
             </section>
           </div>
-          <section class="panel" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="field"><label for="portraitUrl">Imagem do personagem (URL)</label><input id="portraitUrl" type="text" value="${esc(p.portrait)}" data-field="portrait" placeholder="https://..."></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>`;
+          </div>
+          <section class="panel character-tab-panel hidden" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="field"><label for="portraitUrl">Imagem do personagem (URL)</label><input id="portraitUrl" type="text" value="${esc(p.portrait)}" data-field="portrait" placeholder="https://..."></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>`;
         $('saveLabel').textContent = currentUser ? 'Sincronizado com a nuvem' : 'Salvo neste navegador';
       }
 
@@ -887,9 +892,9 @@
       $('importFile').addEventListener('change', e => importFile(e.target.files && e.target.files[0]));
       $('sheet').addEventListener('change', e => {
         const p = active(); const t = e.target;
-        if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); }
+        if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
-        if (t.dataset.inventoryField) { const item=p.inventory[Number(t.dataset.index)]; if(item){item[t.dataset.inventoryField]=t.value;persist();} }
+        if (t.dataset.inventoryField) { const item=p.inventory[Number(t.dataset.index)]; if(item){item[t.dataset.inventoryField]=t.value;persist();if(t.dataset.inventoryField==='type')render();} }
         if (t.dataset.condition !== undefined) { p.conditions[Number(t.dataset.condition)]=t.value; persist(); }
         if (t.dataset.field==='sanity'||t.dataset.field==='magicula') { p[t.dataset.field]=Math.max(0,Math.min(100,Number(t.value)||0)); persist(); render(); }
         if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
@@ -916,7 +921,7 @@
         }
       });
       $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
-      document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); });
+      document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); const showCharacter=tab.dataset.sheetTab==='character'; const main=$('sheet').querySelector('.main-tab-panel'); const character=$('sheet').querySelector('.character-tab-panel'); if(main)main.classList.toggle('hidden',showCharacter); if(character)character.classList.toggle('hidden',!showCharacter); });
       $('sheet').addEventListener('click', e => { const filter=e.target.closest('[data-inventory-filter]'); if(filter){active().inventoryFilter=filter.dataset.inventoryFilter;persist();render();} });
       $('sheet').addEventListener('change', e => {
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
