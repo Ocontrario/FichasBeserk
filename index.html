@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#171717" />
+  <title>Crônica | Ficha de personagem</title>
+  <style>
+    :root {
+      --bg: #111211;
+      --bg-soft: #191b19;
+      --panel: #202320;
+      --panel-2: #252925;
+      --line: #3b413b;
+      --line-soft: #303630;
+      --text: #f1f0e8;
+      --muted: #a6ada3;
+      --accent: #d9c28c;
+      --accent-strong: #ead7a9;
+      --accent-ink: #201d15;
+      --danger: #d98282;
+      --success: #9dc7a0;
+      --radius: 16px;
+      --shadow: 0 18px 50px rgba(0,0,0,.22);
+    }
+    * { box-sizing: border-box; }
+    /* Paletas selecionáveis */
+    body[data-theme="roxo"] { --bg:#100d18; --bg-soft:#1a1425; --panel:#241b32; --panel-2:#2d2340; --line:#55416d; --line-soft:#40314f; --text:#f3edf9; --muted:#b6a7c7; --accent:#bd8cff; --accent-strong:#d8baff; --accent-ink:#21152f; }
+    body[data-theme="vermelho"] { --bg:#180d0e; --bg-soft:#241416; --panel:#321d20; --panel-2:#3d2428; --line:#704047; --line-soft:#512f35; --text:#fff0f0; --muted:#c6a5a7; --accent:#ef777e; --accent-strong:#ffadb1; --accent-ink:#351316; }
+    body[data-theme="amarelo"] { --bg:#171409; --bg-soft:#211d10; --panel:#302a18; --panel-2:#3a321c; --line:#70613a; --line-soft:#514728; --text:#fff9e8; --muted:#c5b98e; --accent:#f0ca55; --accent-strong:#ffe28a; --accent-ink:#30250a; }
+    body[data-theme="preto"] { --bg:#090909; --bg-soft:#111; --panel:#191919; --panel-2:#222; --line:#414141; --line-soft:#303030; --text:#f4f4f4; --muted:#aaa; --accent:#d0d0d0; --accent-strong:#fff; --accent-ink:#111; }
+    body[data-theme="roxo"] .panel, body[data-theme="vermelho"] .panel, body[data-theme="amarelo"] .panel, body[data-theme="preto"] .panel { background:linear-gradient(160deg,color-mix(in srgb,var(--panel-2) 97%,transparent),color-mix(in srgb,var(--panel) 98%,transparent)); }
+    body[data-theme="roxo"] .brand-mark, body[data-theme="vermelho"] .brand-mark, body[data-theme="amarelo"] .brand-mark, body[data-theme="preto"] .brand-mark { border-color:var(--line); background:var(--panel); }
+    .theme-picker { display:flex; align-items:center; gap:7px; padding:2px 5px; }
+    .theme-label { color:var(--muted); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; margin-right:2px; }
+    .theme-swatch { width:25px; height:25px; border:2px solid rgba(255,255,255,.35); border-radius:50%; padding:0; box-shadow:0 0 0 1px rgba(0,0,0,.25); position:relative; }
+    .theme-swatch[aria-pressed="true"] { outline:2px solid var(--accent); outline-offset:3px; }
+    .theme-swatch[data-theme-choice="roxo"] { background:#bd8cff; }
+    .theme-swatch[data-theme-choice="vermelho"] { background:#ef777e; }
+    .theme-swatch[data-theme-choice="amarelo"] { background:#f0ca55; }
+    .theme-swatch[data-theme-choice="preto"] { background:#090909; border-color:#888; }
+    .theme-swatch:hover { transform:scale(1.1); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 15% -10%, rgba(217,194,140,.09), transparent 38%),
+        radial-gradient(ellipse at 100% 20%, rgba(120,140,110,.06), transparent 32%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 54px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:24px; }
+    .brand { display:flex; align-items:center; gap:13px; min-width:0; }
+    .brand-mark { width:44px; height:44px; display:grid; place-items:center; border:1px solid #746b53; color:var(--accent); border-radius:13px; background:linear-gradient(145deg,#302d24,#1d201c); font-size:21px; box-shadow:var(--shadow); }
+    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.19em; font-size:10px; font-weight:800; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-size:27px; line-height:1.1; letter-spacing:.01em; margin:3px 0 0; font-weight:600; }
+    .top-note { color:var(--muted); font-size:12px; text-align:right; }
+    .toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:9px; background:rgba(32,35,32,.82); border:1px solid var(--line); border-radius:var(--radius); padding:12px; margin-bottom:18px; box-shadow:var(--shadow); }
+    .toolbar select { min-width:190px; flex:1; }
+    select, input[type="text"], input[type="number"] { min-width:0; color:var(--text); background:#171a17; border:1px solid #444b43; border-radius:9px; padding:10px 11px; outline:none; transition:border .15s, box-shadow .15s; }
+    select:focus, input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,194,140,.12); }
+    input::placeholder { color:#70786e; }
+    .btn { border:1px solid #4b5148; background:#2a2f29; color:var(--text); border-radius:10px; padding:9px 12px; font-size:12px; font-weight:700; transition:transform .15s, background .15s, border .15s; }
+    .btn:hover { background:#363d34; border-color:#68715f; transform:translateY(-1px); }
+    .btn.primary { color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
+    .btn.primary:hover { background:var(--accent-strong); }
+    .btn.danger { color:#efb5b5; border-color:#704848; background:#342626; }
+    .btn.small { padding:6px 9px; font-size:11px; }
+    .save-state { margin-left:auto; display:flex; align-items:center; gap:7px; color:var(--muted); font-size:11px; white-space:nowrap; padding:0 5px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 10px rgba(157,199,160,.45); }
+    .layout { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(390px,.92fr); gap:18px; align-items:start; }
+    .left-stack, .right-stack { display:grid; gap:18px; }
+    .panel { background:linear-gradient(160deg,rgba(37,41,37,.97),rgba(28,31,28,.98)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:17px 19px 14px; border-bottom:1px solid var(--line-soft); }
+    .panel-title { display:flex; align-items:center; gap:10px; margin:0; font-family:Georgia,"Times New Roman",serif; font-size:19px; font-weight:700; letter-spacing:.025em; }
+    .panel-title:before { content:""; display:block; width:4px; height:19px; border-radius:4px; background:var(--accent); }
+    .panel-sub { color:var(--muted); font-size:11px; }
+    .identity { padding:19px; }
+    .identity-grid { display:grid; grid-template-columns:2fr .7fr .8fr .8fr; gap:12px; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .field label { color:#b9c0b5; text-transform:uppercase; letter-spacing:.1em; font-size:9px; font-weight:800; }
+    .field input { width:100%; }
+    .field.name { grid-column:span 2; }
+    .field.origin { grid-column:span 2; }
+    .field.class { grid-column:span 2; }
+    .points-card { grid-column:4; grid-row:1 / span 2; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; border:1px solid #70674f; border-radius:12px; background:linear-gradient(145deg,rgba(217,194,140,.12),rgba(217,194,140,.035)); min-height:107px; }
+    .points-card .number { font-family:Georgia,serif; color:var(--accent-strong); font-size:42px; font-weight:700; line-height:1; }
+    .points-card .caption { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.13em; }
+    .attributes { padding:12px 18px 18px; }
+    .attribute-row { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--line-soft); }
+    .attribute-row:last-child { border-bottom:0; }
+    .attribute-name { font-family:Georgia,serif; font-size:17px; font-weight:700; letter-spacing:.025em; }
+    .attribute-desc { color:var(--muted); font-size:11px; margin-top:3px; }
+    .stepper { display:flex; align-items:center; gap:7px; }
+    .stepper button { width:30px; height:30px; border:1px solid #4a5148; border-radius:8px; color:var(--accent); background:#191d19; font-size:17px; line-height:1; }
+    .stepper button:hover { border-color:var(--accent); background:#2c3028; }
+    .stepper .value { min-width:25px; text-align:center; font-family:Georgia,serif; font-size:22px; font-weight:700; }
+    .hp-wrap { display:flex; align-items:center; gap:13px; padding:17px 19px; }
+    .heart { color:#d88c87; font-size:27px; line-height:1; }
+    .hp-wrap label { color:#c4c9bf; font-size:12px; font-weight:800; }
+    .hp-fields { display:flex; align-items:center; gap:9px; margin-left:auto; }
+    .hp-field { display:flex; flex-direction:column; gap:4px; align-items:center; }
+    .hp-field label { color:var(--muted); font-size:9px; text-transform:uppercase; letter-spacing:.08em; }
+    .hp-wrap input { width:86px; text-align:center; font-family:Georgia,serif; font-size:21px; font-weight:700; color:var(--accent-strong); }
+    .skills { padding:7px 17px 17px; display:grid; grid-template-columns:1fr 1fr; column-gap:18px; }
+    .skill { display:flex; align-items:center; gap:8px; min-width:0; padding:8px 1px; border-bottom:1px solid rgba(58,65,57,.62); }
+    .skill-check { appearance:none; flex:0 0 auto; width:15px; height:15px; margin:0; border:1.5px solid #879084; border-radius:50%; background:transparent; cursor:pointer; position:relative; }
+    .skill-check:checked { background:var(--accent); border-color:var(--accent); }
+    .skill-check:checked:after { content:""; position:absolute; width:5px; height:8px; border:solid #222319; border-width:0 2px 2px 0; transform:rotate(45deg); left:4px; top:1px; }
+    .skill-name { font-size:11px; color:#e0e2d9; flex:1; min-width:0; }
+    .skill-name.trained { color:var(--accent-strong); }
+    .skill-bonus { width:43px; padding:5px 4px !important; text-align:center; font-size:11px; }
+    .equipment { padding:14px 19px 18px; }
+    .equipment-list { display:grid; gap:8px; }
+    .equipment-row { display:grid; grid-template-columns:25px 1fr 30px; align-items:center; gap:9px; }
+    .equipment-index { color:var(--accent); font-family:Georgia,serif; font-size:13px; text-align:center; }
+    .equipment-row input { width:100%; }
+    .remove-equip { width:30px; height:34px; border:1px solid transparent; color:#9b827c; background:transparent; border-radius:8px; font-size:16px; }
+    .remove-equip:hover { color:#efaaaa; background:#382727; border-color:#684747; }
+    .equip-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; color:var(--muted); font-size:10px; }
+    .dice-content { padding:17px 19px 19px; }
+    .dice-row { display:grid; grid-template-columns:repeat(6,1fr); gap:7px; }
+    .die { border:1px solid #50584d; background:#191d19; color:#dfe3d8; border-radius:10px; padding:12px 2px 10px; text-align:center; transition:.15s; }
+    .die strong { display:block; font-family:Georgia,serif; font-size:18px; }
+    .die span { display:block; margin-top:3px; font-size:8px; color:var(--muted); letter-spacing:.08em; }
+    .die.active { color:var(--accent-strong); background:rgba(217,194,140,.13); border-color:var(--accent); box-shadow:inset 0 0 0 1px rgba(217,194,140,.14); }
+    .roll-controls { display:flex; align-items:end; gap:10px; margin-top:15px; }
+    .quantity-field { width:105px; }
+    .quantity-field input { width:100%; text-align:center; }
+    .die-summary { flex:1; padding-bottom:9px; color:var(--muted); font-size:11px; }
+    .roll-btn { min-width:105px; }
+    .result { display:none; margin-top:15px; padding:13px 14px; border:1px solid #6d6247; background:rgba(217,194,140,.09); border-radius:12px; }
+    .result.show { display:block; }
+    .result-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .result-formula { color:var(--accent-strong); font-size:12px; font-weight:800; }
+    .result-total { color:var(--accent-strong); font-family:Georgia,serif; font-size:27px; font-weight:700; }
+    .result-values { margin-top:5px; color:#c3c8bd; font-size:11px; overflow-wrap:anywhere; line-height:1.6; }
+    .history { margin-top:15px; }
+    .history-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+    .history-title { color:#aeb6aa; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.13em; }
+    .history-list { display:grid; gap:6px; max-height:175px; overflow:auto; }
+    .history-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:8px; background:#191d19; border:1px solid #30372f; }
+    .history-left { min-width:0; }
+    .history-expr { font-size:11px; color:#e3e5dd; font-weight:700; }
+    .history-time { color:#778174; font-size:9px; margin-top:2px; }
+    .history-total { color:var(--accent-strong); font-family:Georgia,serif; font-size:18px; font-weight:700; }
+    .empty-history { padding:13px; color:#778174; text-align:center; border:1px dashed #3b443a; border-radius:9px; font-size:11px; }
+    .footer-note { text-align:center; color:#697267; font-size:10px; margin-top:22px; }
+    .toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%,20px); opacity:0; pointer-events:none; padding:11px 15px; color:#1d2019; background:var(--accent-strong); border-radius:10px; font-size:12px; font-weight:800; box-shadow:var(--shadow); transition:.2s; z-index:20; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .hidden { display:none !important; }
+    @media (max-width: 1000px) { .layout { grid-template-columns:1fr; } .right-stack { grid-template-columns:1fr; } }
+    @media (max-width: 650px) {
+      .app { width:min(100% - 22px, 600px); padding-top:16px; }
+      .topbar { align-items:flex-start; }
+      .top-note { display:none; }
+      h1 { font-size:23px; }
+      .toolbar { gap:7px; }
+      .toolbar select { flex-basis:100%; }
+      .save-state { margin-left:0; }
+      .identity-grid { grid-template-columns:1fr 1fr; }
+      .field.name, .field.origin, .field.class { grid-column:span 2; }
+      .points-card { grid-column:2; grid-row:2 / span 2; }
+      .skills { column-gap:11px; padding-left:12px; padding-right:12px; }
+      .skill { gap:6px; }
+      .skill-name { font-size:10px; }
+      .skill-bonus { width:37px; }
+      .dice-row { gap:5px; }
+      .die { padding:10px 1px 8px; }
+      .die strong { font-size:16px; }
+      .roll-controls { flex-wrap:wrap; }
+      .die-summary { min-width:110px; }
+      .roll-btn { flex:1; }
+    }
+    @media (max-width: 390px) { .skills { grid-template-columns:1fr; } .points-card .number { font-size:35px; } }
+
+    /* Layout compacto de tela: menos espaços vazios e mais informação por área */
+    @media screen {
+      .app { width:min(1600px, calc(100% - 24px)); padding:12px 0 24px; }
+      .topbar { gap:12px; margin-bottom:10px; }
+      .brand { gap:9px; }
+      .brand-mark { width:34px; height:34px; border-radius:9px; font-size:17px; }
+      h1 { font-size:22px; }
+      .toolbar { gap:7px; padding:8px; margin-bottom:10px; border-radius:11px; }
+      .toolbar select { min-width:150px; }
+      select, input[type="text"], input[type="number"] { padding:7px 8px; border-radius:7px; }
+      .btn { padding:7px 10px; }
+      .layout { grid-template-columns:minmax(300px,.82fr) minmax(0,1.38fr); gap:10px; }
+      .left-stack, .right-stack { gap:10px; }
+      .panel { border-radius:11px; }
+      .panel-head { padding:9px 12px 7px; gap:8px; }
+      .panel-title { gap:7px; font-size:15px; }
+      .panel-title:before { width:3px; height:15px; }
+      .panel-sub { font-size:9px; }
+      .identity { padding:10px 12px; }
+      .identity-grid { gap:7px; }
+      .field { gap:4px; }
+      .field label { font-size:8px; }
+      .points-card { min-height:76px; border-radius:9px; }
+      .points-card .number { font-size:32px; }
+      .attributes { padding:5px 12px 8px; }
+      .attribute-row { padding:7px 0; gap:8px; }
+      .attribute-name { font-size:14px; }
+      .attribute-desc { font-size:9px; margin-top:1px; }
+      .stepper { gap:5px; }
+      .stepper button { width:25px; height:25px; border-radius:6px; font-size:15px; }
+      .stepper .value { min-width:20px; font-size:18px; }
+      .hp-wrap { padding:9px 12px; gap:9px; }
+      .heart { font-size:22px; }
+      .hp-wrap label { font-size:10px; }
+      .hp-fields { gap:7px; }
+      .hp-wrap input { width:66px; font-size:17px; padding:6px; }
+      .skills { padding:4px 11px 9px; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:10px; }
+      .skill { gap:5px; padding:5px 0; }
+      .skill-check { width:12px; height:12px; }
+      .skill-check:checked:after { width:4px; height:6px; left:3px; top:1px; }
+      .skill-name { font-size:9px; }
+      .skill-bonus { width:34px; padding:3px !important; font-size:10px; }
+      .equipment { padding:8px 12px 10px; }
+      .equipment-list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 10px; }
+      .equipment-row { grid-template-columns:18px minmax(0,1fr) 22px; gap:5px; }
+      .equipment-row input { padding:5px 6px; font-size:10px; }
+      .equipment-index { font-size:10px; }
+      .remove-equip { width:22px; height:27px; font-size:13px; }
+      .equip-footer { margin-top:7px; font-size:9px; }
+      .dice-content { padding:9px 12px 11px; }
+      .dice-row { gap:5px; }
+      .die { padding:8px 2px 6px; border-radius:7px; }
+      .die strong { font-size:15px; }
+      .die span { font-size:7px; }
+      .roll-controls { gap:7px; margin-top:9px; }
+      .quantity-field { width:80px; }
+      .die-summary { font-size:9px; padding-bottom:6px; }
+      .result { margin-top:9px; padding:9px 10px; }
+      .history { margin-top:9px; }
+      .history-list { max-height:110px; }
+      .footer-note { margin-top:12px; }
+    }
+    @media screen and (max-width: 1000px) {
+      .layout { grid-template-columns:minmax(0, .9fr) minmax(0, 1.1fr); }
+    }
+    @media screen and (max-width: 720px) {
+      .app { width:calc(100% - 16px); padding-top:9px; }
+      .layout { grid-template-columns:1fr; }
+      .skills { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .equipment-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media screen and (max-width: 430px) {
+      .skills, .equipment-list { grid-template-columns:1fr; }
+      .panel-sub { display:none; }
+    }
+
+    /* Impressão / salvar como PDF */
+    @page { size: A4 portrait; margin: 9mm; }
+    @media print {
+      :root { color-scheme: light; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { background: var(--bg) !important; color: var(--text) !important; }
+      body { min-height: auto; }
+      .app { width: 100%; max-width: none; margin: 0; padding: 0; }
+      .topbar { margin-bottom: 8px; }
+      .brand-mark { box-shadow: none; }
+      .top-note, .toolbar, .footer-note, .toast,
+      .right-stack > .panel:last-child,
+      .stepper button, .remove-equip, .equip-footer { display: none !important; }
+      .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; align-items: start; }
+      .left-stack, .right-stack { display: contents; }
+      .left-stack > .panel:first-child { grid-column: 1 / -1; }
+      .panel { box-shadow: none; break-inside: avoid; page-break-inside: avoid; border-radius: 7px; }
+      .panel-head { padding: 8px 10px 6px; }
+      .panel-title { font-size: 13px; }
+      .panel-title:before { height: 13px; width: 3px; }
+      .panel-sub { font-size: 8px; }
+      .identity { padding: 9px; }
+      .identity-grid { gap: 6px; }
+      .field { gap: 3px; }
+      .field label { font-size: 7px; }
+      input[type="text"], input[type="number"], select { padding: 5px 6px; font-size: 9px; border-radius: 4px; }
+      .points-card { min-height: 58px; border-radius: 5px; }
+      .points-card .number { font-size: 25px; }
+      .points-card .caption { font-size: 6px; }
+      .attributes { padding: 4px 10px 7px; }
+      .attribute-row { padding: 7px 0; gap: 5px; }
+      .attribute-name { font-size: 12px; }
+      .attribute-desc { font-size: 8px; }
+      .stepper { gap: 0; }
+      .stepper .value { min-width: 24px; font-size: 15px; }
+      .hp-wrap { padding: 9px 10px; gap: 7px; }
+      .heart { font-size: 18px; }
+      .hp-wrap label { font-size: 9px; }
+      .hp-fields { gap:5px; }
+      .hp-field { gap:2px; }
+      .hp-field label { font-size:6px; }
+      .hp-wrap input { width:42px; font-size:13px; padding:4px 2px; }
+      .skills { padding: 4px 9px 8px; column-gap: 8px; }
+      .skill { gap: 4px; padding: 4px 0; }
+      .skill-check { width: 10px; height: 10px; }
+      .skill-check:checked:after { width: 3px; height: 5px; left: 3px; top: 0; }
+      .skill-name { font-size: 8px; }
+      .skill-bonus { width: 28px; padding: 2px !important; font-size: 8px; }
+      .equipment { padding: 7px 10px; }
+      .equipment-list { gap: 4px; }
+      .equipment-row { grid-template-columns: 15px 1fr; gap: 5px; }
+      .equipment-index { font-size: 9px; }
+      .equipment-row input { border: 0; border-bottom: 1px solid var(--line) !important; background: transparent !important; border-radius: 0; padding: 4px 2px; }
+      .left-stack > .panel:nth-child(2), .right-stack > .panel:nth-child(2) { break-inside: avoid; }
+      .brand .eyebrow { font-size: 7px; }
+      h1 { font-size: 19px; }
+    }
+
+
+    /* Impressão compacta: distribui os blocos pela folha A4 horizontal */
+    @page { size: A4 landscape; margin: 5mm; }
+    @media print {
+      html, body { width: 287mm !important; min-height: 200mm !important; height: auto !important; overflow: visible !important; }
+      .app { width: 100% !important; padding: 0 !important; margin: 0 !important; }
+      .topbar { margin: 0 0 2mm !important; }
+      .brand-mark { width: 8mm !important; height: 8mm !important; font-size: 13px !important; }
+      h1 { font-size: 15px !important; }
+      .eyebrow { font-size: 6px !important; }
+      .layout { display: grid !important; grid-template-columns: minmax(0,.78fr) minmax(0,.82fr) minmax(0,1.8fr) !important; gap: 2mm !important; align-items: start !important; }
+      .left-stack, .right-stack { display: contents !important; }
+      .left-stack > .panel:first-child { grid-column: 1 / -1 !important; }
+      .left-stack > .panel:nth-child(2) { grid-column: 1 !important; }
+      .left-stack > .panel:nth-child(3) { grid-column: 2 !important; }
+      .right-stack > .panel:first-child { grid-column: 1 / 3 !important; }
+      .right-stack > .panel:nth-child(2) { grid-column: 3 !important; grid-row: 2 / span 2 !important; }
+      .panel { border-radius: 4px !important; }
+      .panel-head { padding: 3px 6px 2px !important; }
+      .panel-title { font-size: 10px !important; }
+      .panel-title:before { height: 10px !important; }
+      .panel-sub { font-size: 6px !important; }
+      .identity { padding: 5px !important; }
+      .identity-grid { gap: 4px !important; grid-template-columns: 1.5fr .7fr .8fr .8fr !important; }
+      .field { gap: 2px !important; }
+      .field.name, .field.origin, .field.class { grid-column: span 2 !important; }
+      .points-card { min-height: 42px !important; }
+      .points-card .number { font-size: 19px !important; }
+      .points-card .caption { font-size: 5px !important; }
+      .attributes { padding: 2px 7px 4px !important; }
+      .attribute-row { padding: 3px 0 !important; }
+      .attribute-name { font-size: 9px !important; }
+      .attribute-desc { font-size: 6px !important; margin-top: 0 !important; }
+      .stepper .value { font-size: 12px !important; }
+      .hp-wrap { padding: 5px 7px !important; }
+      .hp-wrap input { width: 34px !important; font-size: 11px !important; }
+      .skills { grid-template-columns: repeat(3,minmax(0,1fr)) !important; column-gap: 5px !important; padding: 2px 6px 4px !important; }
+      .skill { padding: 1px 0 !important; gap: 2px !important; }
+      .skill-name { font-size: 7px !important; }
+      .skill-check { width: 8px !important; height: 8px !important; }
+      .skill-bonus { width: 22px !important; font-size: 7px !important; padding: 1px !important; }
+      .equipment { padding: 3px 6px !important; }
+      .equipment-list { grid-template-columns: 1fr !important; display: grid !important; gap: 1px 5px !important; }
+      .equipment-row { grid-template-columns: 11px 1fr !important; gap: 3px !important; }
+      .equipment-index { font-size: 7px !important; }
+      .equipment-row input { font-size: 7px !important; padding: 2px !important; }
+      .right-stack > .panel:last-child { display: none !important; }
+      .footer-note, .toolbar, .top-note, .toast, .stepper button, .remove-equip, .equip-footer { display: none !important; }
+      input { color: var(--text) !important; }
+    }
+
+
+    .auth-screen { min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(ellipse at 50% 0%,rgba(189,140,255,.12),transparent 45%),var(--bg); }
+    .auth-card { width:min(430px,100%); padding:28px; border:1px solid var(--line); border-radius:18px; background:var(--panel); box-shadow:var(--shadow); }
+    .auth-card h2 { margin:0 0 8px; font:700 26px Georgia,serif; color:var(--accent-strong); }
+    .auth-card p { color:var(--muted); font-size:13px; line-height:1.5; margin:0 0 20px; }
+    .auth-card .field { margin:13px 0; }
+    .auth-card input { width:100%; }
+    .auth-actions { display:flex; gap:9px; margin-top:18px; flex-wrap:wrap; }
+    .auth-actions .btn { flex:1; }
+    .auth-error { color:#ef9999 !important; min-height:18px; margin-top:12px !important; }
+    .auth-switch { background:none; border:0; color:var(--accent-strong); text-decoration:underline; padding:8px 0; font-size:12px; }
+    .auth-user { color:var(--muted); font-size:11px; margin-left:4px; }
+    body:not(.authenticated) .app { display:none; }
+    body.authenticated .auth-screen { display:none; }
+  </style>
+</head>
+<body>
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="eyebrow">Arquivo de campanha</div>
+      <h2>Crônica</h2>
+      <p id="authDescription">Entre com seu usuário e senha para acessar suas fichas.</p>
+      <form id="authForm">
+        <div class="field"><label for="authUsername">Usuário</label><input id="authUsername" type="text" autocomplete="username" minlength="3" maxlength="24" placeholder="Seu nome de usuário" required /></div>
+        <div class="field"><label for="authPassword">Senha</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Sua senha" required /></div>
+        <div class="auth-actions"><button class="btn primary" id="authSubmit" type="submit">Entrar</button></div>
+      </form>
+      <button class="auth-switch" id="authSwitch" type="button">Ainda não tenho uma conta. Criar cadastro</button>
+      <p class="auth-error" id="authError" role="alert"></p>
+      <p style="font-size:11px;margin:10px 0 0">Suas fichas ficam vinculadas à sua conta. Não compartilhe sua senha.</p>
+    </div>
+  </section>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div><div class="eyebrow">Arquivo de campanha</div><h1>Crônica <span style="color:var(--accent)">/</span> Ficha de personagem</h1></div>
+      </div>
+      <div class="top-note">Cada personagem tem seus próprios atributos,<br>perícias, equipamentos e histórico de rolagens.</div>
+    </header>
+
+    <section class="toolbar" aria-label="Gerenciar personagens">
+      <select id="playerSelect" aria-label="Personagem ativo"></select>
+      <button class="btn primary" id="newPlayerBtn">＋ Novo personagem</button>
+      <button class="btn" id="duplicateBtn">⧉ Duplicar</button>
+      <button class="btn danger" id="deleteBtn">Excluir</button>
+      <button class="btn" id="exportOneBtn">↓ Exportar ficha</button>
+      <button class="btn" id="exportAllBtn">↓ Backup geral</button>
+      <button class="btn" id="importBtn">↑ Importar</button>
+      <button class="btn primary" id="printPdfBtn">▤ Gerar PDF / Imprimir</button>
+      <input id="importFile" class="hidden" type="file" accept=".json,application/json" />
+      <div class="theme-picker" role="group" aria-label="Escolher tema de cores">
+        <span class="theme-label">Tema</span>
+        <button class="theme-swatch" type="button" data-theme-choice="roxo" aria-label="Tema roxo" title="Roxo" aria-pressed="false"></button>
+        <button class="theme-swatch" type="button" data-theme-choice="vermelho" aria-label="Tema vermelho" title="Vermelho" aria-pressed="false"></button>
+        <button class="theme-swatch" type="button" data-theme-choice="amarelo" aria-label="Tema amarelo" title="Amarelo" aria-pressed="false"></button>
+        <button class="theme-swatch" type="button" data-theme-choice="preto" aria-label="Tema preto" title="Preto" aria-pressed="false"></button>
+      </div>
+      <span class="auth-user" id="authUserLabel"></span>
+      <button class="btn small" id="logoutBtn" type="button">Sair</button>
+      <div class="save-state"><span class="dot"></span><span id="saveLabel">Conectando...</span></div>
+    </section>
+
+    <div id="sheet" class="layout"></div>
+    <p class="footer-note">Seus dados ficam salvos neste navegador. Exporte um backup para não depender de um único dispositivo.</p>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (() => {
+      'use strict';
+      const STORAGE_KEY = 'cronica_rpg_characters_v1';
+      const THEME_KEY = 'cronica_rpg_theme_v1';
+      const SUPABASE_URL = 'https://anpfytadwcnqwfyrpzgg.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_mDQo7nqVSaiRjdvowkhC3Q_xMR5WJc4';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const THEMES = ['roxo','vermelho','amarelo','preto'];
+      let currentUser = null;
+      let authMode = 'login';
+      let cloudIds = new Set();
+      let cloudTimer = null;
+      let cloudBusy = false;
+      let cloudAgain = false;
+      const ATTRIBUTES = [
+        ['forca', 'FORÇA', 'Força física, dano corpo a corpo e carga.'],
+        ['agilidade', 'AGILIDADE', 'Movimento, reflexos e pontaria.'],
+        ['intelecto', 'INTELECTO', 'Raciocínio, conhecimento e perícia com tecnologia.'],
+        ['prestigio', 'PRESTÍGIO', 'Manipulação, percepção e presença.'],
+        ['vigor', 'VIGOR', 'Resistência, saúde e suporte à dor.']
+      ];
+      const SKILLS = [
+        'Atletismo','Pontaria','Furtividade','Sobrevivência','Percepção','Iniciativa','Investigação','Medicina','Ocultismo','Tecnologia',
+        'Diplomacia','Intimidação','Persuasão','Pilotagem','Pilotagem (Veículo)','Trabalho em Equipe','Truques','Conhecimento','Reflexos','Ofício'
+      ];
+      const DICE = [20,12,10,6,4,2];
+      const $ = (id) => document.getElementById(id);
+      let toastTimer;
+
+      function uid() { return 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+      function makeCharacter(name = 'Novo personagem') {
+        const skills = {};
+        SKILLS.forEach(s => skills[s] = { trained:false, bonus:0 });
+        return {
+          id: uid(), name, age:'', height:'', weight:'', origin:'', className:'',
+          attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
+          hp:'', hpMax:'', hpCurrent:'', skills, equipment:['','','','',''],
+          dice:{sides:20,quantity:1}, history:[], lastResult:null
+        };
+      }
+      function normalizeCharacter(raw) {
+        const base = makeCharacter(raw && raw.name ? String(raw.name) : 'Personagem importado');
+        if (!raw || typeof raw !== 'object') return base;
+        base.id = uid();
+        ['name','age','height','weight','origin','className','hp','hpMax','hpCurrent'].forEach(k => {
+          if (raw[k] !== undefined && raw[k] !== null) base[k] = String(raw[k]);
+        });
+        // Compatibilidade com fichas antigas: o campo hp passa a representar a vida atual.
+        if (raw.hpCurrent === undefined && raw.hp !== undefined) base.hpCurrent = String(raw.hp);
+        ATTRIBUTES.forEach(([key]) => {
+          const n = Number(raw.attributes && raw.attributes[key]);
+          base.attributes[key] = Number.isFinite(n) ? Math.max(0, Math.min(28, Math.floor(n))) : 0;
+        });
+        // Imported characters keep their existing scores, even when a sheet exceeds the default point pool.
+        SKILLS.forEach(s => {
+          const v = raw.skills && raw.skills[s];
+          if (typeof v === 'boolean') base.skills[s] = {trained:v,bonus:0};
+          else if (v && typeof v === 'object') base.skills[s] = {trained:!!v.trained,bonus:Number.isFinite(Number(v.bonus)) ? Math.max(-99,Math.min(99,Number(v.bonus))) : 0};
+        });
+        if (Array.isArray(raw.equipment)) base.equipment = raw.equipment.map(x => String(x || '')).slice(0,100);
+        if (raw.dice && DICE.includes(Number(raw.dice.sides))) base.dice.sides = Number(raw.dice.sides);
+        if (raw.dice && Number.isFinite(Number(raw.dice.quantity))) base.dice.quantity = Math.max(1,Math.min(50,Math.floor(Number(raw.dice.quantity))));
+        if (Array.isArray(raw.history)) base.history = raw.history.slice(0,20).filter(x => x && typeof x === 'object').map(x => ({expression:String(x.expression || ''), total:Number(x.total)||0, results:Array.isArray(x.results)?x.results.map(Number).filter(Number.isFinite):[], timestamp:Number(x.timestamp)||Date.now()}));
+        if (raw.lastResult && typeof raw.lastResult === 'object') base.lastResult = raw.lastResult;
+        return base;
+      }
+      function loadState() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+          if (raw && Array.isArray(raw.players) && raw.players.length) {
+            const players = raw.players.map(p => ({...p, id:String(p.id || uid())}));
+            return {players, activeId:players.some(p => p.id === raw.activeId) ? raw.activeId : players[0].id};
+          }
+        } catch (e) { console.warn('Não foi possível ler os dados salvos:', e); }
+        const first = makeCharacter('Meu personagem');
+        return {players:[first], activeId:first.id};
+      }
+      let state = loadState();
+      let activeDie = 20;
+      function applyTheme(theme, save = true) {
+        const selected = THEMES.includes(theme) ? theme : 'preto';
+        document.body.dataset.theme = selected;
+        document.querySelectorAll('[data-theme-choice]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.themeChoice === selected)));
+        if (save) { try { localStorage.setItem(THEME_KEY, selected); } catch (e) { console.warn('Não foi possível salvar o tema:', e); } }
+      }
+      applyTheme((() => { try { return localStorage.getItem(THEME_KEY) || 'preto'; } catch (e) { return 'preto'; } })(), false);
+      let lastSavedAt = Date.now();
+      const active = () => state.players.find(p => p.id === state.activeId) || state.players[0];
+      const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const totalPoints = (p) => ATTRIBUTES.reduce((n,[k]) => n + (Number(p.attributes[k]) || 0), 0);
+      const remaining = (p) => 28 - totalPoints(p);
+      const fmtTime = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+      function persist() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          lastSavedAt = Date.now();
+          $('saveLabel').textContent = currentUser ? 'Salvando na nuvem...' : 'Salvo neste navegador';
+          if (currentUser) scheduleCloudSave();
+          return true;
+        } catch (e) {
+          $('saveLabel').textContent = 'Falha ao salvar';
+          showToast('Não foi possível salvar. Exporte um backup.');
+          return false;
+        }
+      }
+      function showToast(message) {
+        const el = $('toast'); el.textContent = message; el.classList.add('show');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
+      }
+      function render() {
+        const p = active();
+        $('playerSelect').innerHTML = state.players.map(x => `<option value="${esc(x.id)}" ${x.id===state.activeId?'selected':''}>${esc(x.name || 'Sem nome')}</option>`).join('');
+        const attrs = ATTRIBUTES.map(([key,label,desc]) => `
+          <div class="attribute-row">
+            <div><div class="attribute-name">${label}</div><div class="attribute-desc">${desc}</div></div>
+            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${Number(p.attributes[key])||0}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0?'disabled':''}>＋</button></div>
+          </div>`).join('');
+        const skillMarkup = SKILLS.map((skill,i) => {
+          const val = p.skills[skill] || {trained:false,bonus:0};
+          return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="-99" max="99" value="${Number(val.bonus)||0}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
+        }).join('');
+        const equipment = p.equipment.map((item,i) => `<div class="equipment-row"><span class="equipment-index">${i+1}.</span><input type="text" maxlength="90" placeholder="Item ${i+1}" value="${esc(item)}" data-equipment="${i}" aria-label="Equipamento ${i+1}"><button class="remove-equip" type="button" data-action="remove-equipment" data-index="${i}" title="Remover espaço" aria-label="Remover item ${i+1}">×</button></div>`).join('');
+        const history = p.history.length ? p.history.map(item => `<div class="history-item"><div class="history-left"><div class="history-expr">${esc(item.expression)}</div><div class="history-time">${esc(item.detail || '')} · ${fmtTime(item.timestamp)}</div></div><div class="history-total">${Number(item.total)}</div></div>`).join('') : '<div class="empty-history">Suas rolagens vão aparecer aqui.</div>';
+        let result = '';
+        if (p.lastResult && Array.isArray(p.lastResult.results)) {
+          result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="result-values">Dados: ${p.lastResult.results.map(Number).join(' · ')}${p.lastResult.detail ? '<br>'+esc(p.lastResult.detail) : ''}</div></div>`;
+        }
+        $('sheet').innerHTML = `
+          <div class="left-stack">
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Identificação</h2><span class="panel-sub">Dados do personagem</span></div>
+              <div class="identity"><div class="identity-grid">
+                <div class="field name"><label for="charName">Nome do personagem</label><input id="charName" type="text" maxlength="70" placeholder="Nome" value="${esc(p.name)}" data-field="name"></div>
+                <div class="field"><label for="charAge">Idade</label><input id="charAge" type="text" maxlength="12" placeholder="—" value="${esc(p.age)}" data-field="age"></div>
+                <div class="field"><label for="charHeight">Altura</label><input id="charHeight" type="text" maxlength="16" placeholder="—" value="${esc(p.height)}" data-field="height"></div>
+                <div class="field"><label for="charWeight">Peso</label><input id="charWeight" type="text" maxlength="16" placeholder="—" value="${esc(p.weight)}" data-field="weight"></div>
+                <div class="field origin"><label for="charOrigin">Origem</label><input id="charOrigin" type="text" maxlength="70" placeholder="Origem" value="${esc(p.origin)}" data-field="origin"></div>
+                <div class="field class"><label for="charClass">Classe</label><input id="charClass" type="text" maxlength="70" placeholder="Classe" value="${esc(p.className)}" data-field="className"></div>
+                <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / 28 gastos</div></div>
+              </div></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Atributos</h2><span class="panel-sub">Distribua os 28 pontos</span></div>
+              <div class="attributes">${attrs}</div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Inventário</h2><button type="button" class="btn small" data-action="add-equipment">＋ Adicionar espaço</button></div>
+              <div class="equipment"><div class="equipment-list">${equipment}</div><div class="equip-footer"><span>O que o personagem consegue carregar.</span><span>${p.equipment.filter(x=>String(x).trim()).length}/${p.equipment.length} preenchidos</span></div></div>
+            </section>
+          </div>
+          <div class="right-stack">
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Pontos de vida</h2><span class="panel-sub">Vida máxima e atual</span></div>
+              <div class="hp-wrap"><span class="heart">♥</span><div class="hp-fields"><div class="hp-field"><label for="hpMaxInput">Vida máxima</label><input id="hpMaxInput" type="number" min="0" max="9999" placeholder="0" value="${esc(p.hpMax)}" data-field="hpMax"></div><div class="hp-field"><label for="hpCurrentInput">Vida atual</label><input id="hpCurrentInput" type="number" min="0" max="9999" placeholder="0" value="${esc(p.hpCurrent !== undefined ? p.hpCurrent : p.hp)}" data-field="hpCurrent"></div></div></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Perícias</h2><span class="panel-sub">Marque o treinamento e ajuste o bônus</span></div>
+              <div class="skills">${skillMarkup}</div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2 class="panel-title">Rolador de dados</h2><span class="panel-sub">A sorte está lançada</span></div>
+              <div class="dice-content">
+                <div class="dice-row">${DICE.map(s => `<button type="button" class="die ${activeDie===s?'active':''}" data-die="${s}" aria-pressed="${activeDie===s}"><strong>D${s}</strong><span>${s===2?'MOEDA': 'DADO'}</span></button>`).join('')}</div>
+                <div class="roll-controls" style="display:block">
+                  <div class="field"><label for="diceExpression">Expressão de rolagem</label><input id="diceExpression" type="text" placeholder="Ex.: 1d20 + 1d12 + 10" value="${esc(p.dice.expression || `${p.dice.quantity}d${activeDie}`)}" /></div>
+                  <div class="die-summary">Use dados diferentes e modificadores. Ex.: <strong style="color:var(--accent-strong)">1d20 + 1d12 + 10</strong></div>
+                  <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
+                </div>
+                ${result}
+                <div class="history"><div class="history-head"><span class="history-title">Histórico deste personagem</span><button type="button" class="btn small" data-action="clear-history">Limpar</button></div><div class="history-list">${history}</div></div>
+              </div>
+            </section>
+          </div>`;
+        $('saveLabel').textContent = currentUser ? 'Sincronizado com a nuvem' : 'Salvo neste navegador';
+      }
+
+      function switchPlayer(id) {
+        if (!state.players.some(p => p.id === id)) return;
+        state.activeId = id; activeDie = active().dice.sides || 20; persist(); render();
+      }
+      function addPlayer() {
+        const p = makeCharacter('Novo personagem'); state.players.push(p); state.activeId = p.id; activeDie = 20; persist(); render(); $('charName').focus(); $('charName').select(); showToast('Personagem criado!');
+      }
+      function duplicatePlayer() {
+        const copy = JSON.parse(JSON.stringify(active())); copy.id = uid(); delete copy.cloudId; copy.name = (copy.name || 'Personagem') + ' (cópia)'; copy.history = []; copy.lastResult = null; state.players.push(copy); state.activeId = copy.id; activeDie = copy.dice.sides || 20; persist(); render(); showToast('Ficha duplicada!');
+      }
+      function deletePlayer() {
+        if (state.players.length === 1) { showToast('Mantenha pelo menos um personagem.'); return; }
+        const p = active(); if (!confirm(`Excluir a ficha de "${p.name || 'Sem nome'}"? Essa ação não pode ser desfeita.`)) return;
+        state.players = state.players.filter(x => x.id !== p.id); state.activeId = state.players[0].id; activeDie = active().dice.sides || 20; persist(); render(); showToast('Personagem excluído.');
+      }
+      function exportJSON(data, filename) {
+        const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }
+      function slug(s) { return String(s || 'personagem').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'personagem'; }
+      function importFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(String(reader.result));
+            if (data && data.type === 'cronica-rpg-backup' && Array.isArray(data.players)) {
+              const imported = data.players.map(normalizeCharacter);
+              if (!imported.length) throw new Error('O backup não tem personagens.');
+              state.players.push(...imported); state.activeId = imported[0].id;
+              persist(); render(); showToast(`${imported.length} personagem(ns) importado(s)!`);
+            } else if (data && typeof data === 'object' && data.attributes) {
+              const imported = normalizeCharacter(data); state.players.push(imported); state.activeId = imported.id; activeDie = imported.dice.sides; persist(); render(); showToast('Ficha importada!');
+            } else throw new Error('Formato de arquivo não reconhecido.');
+          } catch (e) { alert('Não foi possível importar: ' + e.message); }
+          $('importFile').value = '';
+        };
+        reader.onerror = () => alert('Não foi possível ler esse arquivo.');
+        reader.readAsText(file);
+      }
+      function secureRandom(max) {
+        if (window.crypto && window.crypto.getRandomValues) {
+          const range = 0x100000000; const limit = Math.floor(range / max) * max; const arr = new Uint32Array(1); let n;
+          do { window.crypto.getRandomValues(arr); n = arr[0]; } while (n >= limit);
+          return (n % max) + 1;
+        }
+        return Math.floor(Math.random() * max) + 1;
+      }
+      function roll() {
+        const p = active();
+        const expression = ($('diceExpression')?.value || '').replace(/\s+/g,'');
+        if (!expression || !/^(?:\d+d(?:20|12|10|6|4|2)|\d+)(?:[+-](?:\d+d(?:20|12|10|6|4|2)|\d+))*$/i.test(expression)) {
+          showToast('Expressão inválida. Exemplo: 1d20 + 1d12 + 10'); return;
+        }
+        const tokens = expression.match(/[+-]?\d+d(?:20|12|10|6|4|2)|[+-]?\d+/ig) || [];
+        let total = 0; const results = []; const detail = [];
+        for (const token of tokens) {
+          const sign = token[0] === '-' ? -1 : 1;
+          const part = token.replace(/^[+-]/,'');
+          const dice = part.match(/^(\d+)d(20|12|10|6|4|2)$/i);
+          if (dice) {
+            const count = Number(dice[1]), sides = Number(dice[2]);
+            if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
+            const rolls = Array.from({length:count},() => secureRandom(sides));
+            const subtotal = rolls.reduce((a,b)=>a+b,0) * sign; total += subtotal;
+            results.push(...rolls); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
+          } else { const n = Number(part) * sign; total += n; detail.push(`${n>=0?'+':''}${n}`); }
+        }
+        const entry = {expression:expression.replace(/([+-])/g,' $1 ').trim(),results,total,timestamp:Date.now(),detail:detail.join(' | ')};
+        p.lastResult = entry; p.history.unshift(entry); p.history = p.history.slice(0,20);
+        persist(); render();
+      }
+
+      function usernameEmail(username) {
+        return username.trim().toLowerCase() + '@users.cronica.app';
+      }
+      function setAuthMode(mode) {
+        authMode = mode;
+        $('authDescription').textContent = mode === 'signup' ? 'Crie sua conta para guardar seus personagens na nuvem.' : 'Entre com seu usuário e senha para acessar suas fichas.';
+        $('authSubmit').textContent = mode === 'signup' ? 'Criar conta' : 'Entrar';
+        $('authSwitch').textContent = mode === 'signup' ? 'Já tenho uma conta. Voltar ao login' : 'Ainda não tenho uma conta. Criar cadastro';
+        $('authPassword').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+        $('authError').textContent = '';
+      }
+      function showAuthError(message) { $('authError').textContent = message; }
+      async function loadCloudCharacters(allowLocalMigration = false) {
+        const { data, error } = await supabase.from('characters').select('id,name,sheet').eq('user_id', currentUser.id).order('created_at');
+        if (error) throw error;
+        cloudIds = new Set((data || []).map(row => row.id));
+        if (data && data.length) {
+          const players = data.map(row => ({ ...(row.sheet || makeCharacter(row.name || 'Personagem')), id:(row.sheet && row.sheet.id) || uid(), cloudId:row.id, name:row.name || (row.sheet && row.sheet.name) || 'Sem nome' }));
+          state = {players, activeId:players[0].id};
+        } else {
+          // Só importa fichas locais durante o primeiro cadastro, nunca ao entrar em outra conta.
+          if (allowLocalMigration) {
+            try {
+              const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+              if (local && Array.isArray(local.players) && local.players.length) state = {players:local.players.map(p => ({...p, id:String(p.id || uid()), cloudId:null})), activeId:local.activeId};
+            } catch (_) {}
+          } else {
+            const first = makeCharacter('Meu personagem');
+            state = {players:[first], activeId:first.id};
+          }
+          await syncCloudNow();
+        }
+        activeDie = active().dice.sides || 20;
+        render();
+        document.body.classList.add('authenticated');
+        $('authUserLabel').textContent = '@' + (currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
+        $('saveLabel').textContent = 'Sincronizado com a nuvem';
+      }
+      async function syncCloudNow() {
+        if (!currentUser || cloudBusy) { cloudAgain = true; return; }
+        cloudBusy = true;
+        try {
+          const kept = new Set();
+          for (const p of state.players) {
+            const payload = {user_id:currentUser.id, name:p.name || 'Sem nome', sheet:p};
+            if (p.cloudId) {
+              const {error} = await supabase.from('characters').update(payload).eq('id',p.cloudId).eq('user_id',currentUser.id);
+              if (error) throw error;
+              kept.add(p.cloudId);
+            } else {
+              const {data,error} = await supabase.from('characters').insert(payload).select('id').single();
+              if (error) throw error;
+              p.cloudId = data.id; kept.add(data.id);
+            }
+          }
+          const stale = [...cloudIds].filter(id => !kept.has(id));
+          if (stale.length) {
+            const {error} = await supabase.from('characters').delete().in('id',stale);
+            if (error) throw error;
+          }
+          cloudIds = kept;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          $('saveLabel').textContent = 'Sincronizado com a nuvem';
+        } catch (error) {
+          console.error('Falha na sincronização:', error);
+          $('saveLabel').textContent = 'Erro ao sincronizar';
+          showToast('Não foi possível sincronizar. Confira sua conexão.');
+        } finally {
+          cloudBusy = false;
+          if (cloudAgain) { cloudAgain = false; scheduleCloudSave(); }
+        }
+      }
+      function scheduleCloudSave() {
+        clearTimeout(cloudTimer);
+        cloudTimer = setTimeout(() => syncCloudNow(), 650);
+      }
+      async function enterAccount(user, allowLocalMigration = false) {
+        currentUser = user;
+        try {
+          await loadCloudCharacters(allowLocalMigration);
+        } catch (error) {
+          console.error(error);
+          currentUser = null;
+          showAuthError('Não foi possível carregar suas fichas. Tente novamente.');
+          await supabase.auth.signOut();
+        }
+      }
+      $('authSwitch').addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
+      $('authForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const username = $('authUsername').value.trim().toLowerCase();
+        const password = $('authPassword').value;
+        if (!/^[a-z0-9_]{3,24}$/.test(username)) { showAuthError('Use de 3 a 24 caracteres: letras sem acento, números ou _.'); return; }
+        if (password.length < 6) { showAuthError('A senha precisa ter pelo menos 6 caracteres.'); return; }
+        $('authSubmit').disabled = true; $('authSubmit').textContent = 'Aguarde...'; showAuthError('');
+        try {
+          const email = usernameEmail(username);
+          if (authMode === 'signup') {
+            const {data,error} = await supabase.auth.signUp({email,password,options:{data:{username}}});
+            if (error) throw error;
+            if (!data.session || !data.user) throw new Error('O cadastro foi criado, mas não houve login automático. Verifique se a confirmação de e-mail está desativada no Supabase.');
+            await enterAccount(data.user, true);
+          } else {
+            const {data,error} = await supabase.auth.signInWithPassword({email,password});
+            if (error) throw error;
+            await enterAccount(data.user);
+          }
+        } catch (error) {
+          const msg = String(error.message || 'Erro desconhecido');
+          showAuthError(/Invalid login credentials/i.test(msg) ? 'Usuário ou senha incorretos.' : /already registered|already been registered/i.test(msg) ? 'Esse usuário já existe. Faça login.' : msg);
+        } finally {
+          $('authSubmit').disabled = false;
+          $('authSubmit').textContent = authMode === 'signup' ? 'Criar conta' : 'Entrar';
+        }
+      });
+      $('logoutBtn').addEventListener('click', async () => {
+        await syncCloudNow();
+        await supabase.auth.signOut();
+        currentUser = null; cloudIds = new Set();
+        document.body.classList.remove('authenticated');
+        $('authPassword').value = ''; $('authUsername').value = ''; setAuthMode('login');
+        state = loadState(); render();
+      });
+      supabase.auth.getSession().then(async ({data,error}) => {
+        if (error) { showAuthError('Não foi possível verificar sua sessão.'); return; }
+        if (data.session) await enterAccount(data.session.user);
+      });
+
+      document.querySelector('.theme-picker').addEventListener('click', e => { const btn = e.target.closest('[data-theme-choice]'); if (btn) { applyTheme(btn.dataset.themeChoice); showToast('Tema ' + btn.dataset.themeChoice + ' aplicado!'); } });
+      $('playerSelect').addEventListener('change', e => switchPlayer(e.target.value));
+      $('newPlayerBtn').addEventListener('click', addPlayer);
+      $('duplicateBtn').addEventListener('click', duplicatePlayer);
+      $('deleteBtn').addEventListener('click', deletePlayer);
+      $('exportOneBtn').addEventListener('click', () => exportJSON(active(),`ficha-${slug(active().name)}.json`));
+      $('exportAllBtn').addEventListener('click', () => exportJSON({type:'cronica-rpg-backup',version:1,exportedAt:new Date().toISOString(),players:state.players},'backup-cronica-rpg.json'));
+      $('importBtn').addEventListener('click', () => $('importFile').click());
+      $('printPdfBtn').addEventListener('click', () => { persist(); window.print(); });
+      $('importFile').addEventListener('change', e => importFile(e.target.files && e.target.files[0]));
+      $('sheet').addEventListener('change', e => {
+        const p = active(); const t = e.target;
+        if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); }
+        if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
+        if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
+        if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; p.skills[t.dataset.skillBonus].bonus = Math.max(-99,Math.min(99,Number(t.value)||0)); t.value = p.skills[t.dataset.skillBonus].bonus; persist(); }
+      });
+      $('sheet').addEventListener('click', e => {
+        const dieButton = e.target.closest('[data-die]');
+        if (dieButton) { activeDie = Number(dieButton.dataset.die); active().dice.sides = activeDie; persist(); render(); return; }
+        const button = e.target.closest('[data-action]');
+        if (button) {
+          const p = active(); const action = button.dataset.action;
+          if (action === 'attr-plus' || action === 'attr-minus') {
+            const key = button.dataset.key;
+            if (action === 'attr-plus' && remaining(p) > 0 && p.attributes[key] < 28) p.attributes[key]++;
+            if (action === 'attr-minus' && p.attributes[key] > 0) p.attributes[key]--;
+            persist(); render();
+          }
+          if (action === 'clear-equipment') { p.equipment[Number(button.dataset.index)] = ''; persist(); render(); }
+          if (action === 'add-equipment') { if (p.equipment.length >= 100) { showToast('Limite de 100 espaços no inventário.'); return; } p.equipment.push(''); persist(); render(); }
+          if (action === 'remove-equipment') { p.equipment.splice(Number(button.dataset.index),1); if (!p.equipment.length) p.equipment.push(''); persist(); render(); }
+          if (action === 'clear-history') { p.history = []; p.lastResult = null; persist(); render(); showToast('Histórico limpo.'); }
+        }
+      });
+      $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
+      $('sheet').addEventListener('change', e => {
+        if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
+      });
+      $('sheet').addEventListener('keydown', e => { if (e.target.id === 'diceExpression' && e.key === 'Enter') roll(); });
+      // A ficha só é exibida depois que uma conta autenticada carregar seus próprios personagens.
+      render();
+    })();
+  </script>
+</body>
+</html>
