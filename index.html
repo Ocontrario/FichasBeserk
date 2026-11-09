@@ -469,7 +469,7 @@
       <div class="top-note">Cada personagem tem seus próprios atributos,<br>perícias, equipamentos e histórico de rolagens.</div><button class="btn home-nav hidden" id="backToHome" type="button">⌂ Início</button>
     </header>
 
-    <section id="campaignHub" class="campaign-hub hidden"><div class="campaign-hero"><div class="eyebrow">Crônica · mesa de jogo</div><h2>O que vamos jogar hoje?</h2><p>Escolha seu caminho. Você pode voltar para esta página sempre que quiser.</p></div><div id="hubHome"><div class="hub-choice-grid"><button class="hub-choice" type="button" data-hub-go="create"><span>✦</span><strong>Sou o mestre</strong><small>Criar uma campanha e acompanhar os personagens.</small></button><button class="hub-choice" type="button" data-hub-go="join"><span>↗</span><strong>Tenho um código</strong><small>Entrar na campanha criada pelo mestre.</small></button><button class="hub-choice" type="button" data-hub-go="sheets"><span>▤</span><strong>Minhas fichas</strong><small>Acessar e editar meus personagens pessoais.</small></button></div><div class="panel" style="padding:16px"><div class="panel-head" style="padding:0 0 12px"><h2 class="panel-title">Minhas campanhas</h2></div><div id="campaignList" class="campaign-list"></div></div></div><div id="hubCreate" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="createCampaignForm"><h3>✦ Criar campanha</h3><p>Você será o mestre e acompanhará os personagens do grupo.</p><input id="newCampaignName" type="text" maxlength="70" minlength="2" placeholder="Nome da campanha" required><button class="btn primary" type="submit">Criar mesa</button></form></div><div id="hubJoin" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="joinCampaignForm"><h3>↗ Entrar por convite</h3><p>Digite o código enviado pelo mestre.</p><input id="joinCampaignCode" type="text" maxlength="8" placeholder="CÓDIGO" required><button class="btn primary" type="submit">Entrar na campanha</button></form></div><div id="hubSheets" class="hub-subview hidden"><div class="personal-sheets-head"><div><div class="eyebrow">Seu arquivo de personagens</div><h2 style="margin:4px 0;font:700 24px Georgia,serif">Minhas fichas</h2><p class="panel-sub">Todas as suas fichas em um só lugar. Escolha uma para continuar.</p></div><button class="btn primary" type="button" id="createSheetFromGallery">＋ Criar nova ficha</button></div><div id="personalSheetsGrid" class="personal-sheets-grid"></div><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button></div></section><section id="campaignWorkspace" class="campaign-workspace hidden"></section>
+    <section id="campaignHub" class="campaign-hub hidden"><div class="campaign-hero"><div class="eyebrow">Crônica · mesa de jogo</div><h2>O que vamos jogar hoje?</h2><p>Escolha seu caminho. Você pode voltar para esta página sempre que quiser.</p></div><div id="hubHome"><div class="hub-choice-grid"><button class="hub-choice" type="button" data-hub-go="create"><span>✦</span><strong>Sou o mestre</strong><small>Criar uma campanha e acompanhar os personagens.</small></button><button class="hub-choice" type="button" data-hub-go="join"><span>↗</span><strong>Tenho um código</strong><small>Entrar na campanha criada pelo mestre.</small></button><button class="hub-choice" type="button" data-hub-go="sheets"><span>▤</span><strong>Minhas fichas</strong><small>Acessar e editar meus personagens pessoais.</small></button></div><div class="panel" style="padding:16px"><div class="panel-head" style="padding:0 0 12px"><h2 class="panel-title">Minhas campanhas</h2></div><div id="campaignList" class="campaign-list"></div></div></div><div id="hubCreate" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="createCampaignForm"><h3>✦ Criar campanha</h3><p>Você será o mestre e acompanhará os personagens do grupo.</p><input id="newCampaignName" type="text" maxlength="70" minlength="2" placeholder="Nome da campanha" required><button class="btn primary" type="submit">Criar mesa</button></form></div><div id="hubJoin" class="hub-subview hidden"><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button><form class="campaign-action-card" id="joinCampaignForm"><h3>↗ Entrar por convite</h3><p>Digite o código enviado pelo mestre.</p><input id="joinCampaignCode" type="text" maxlength="8" placeholder="CÓDIGO" required><button class="btn primary" type="submit">Entrar na campanha</button></form></div><div id="hubSheets" class="hub-subview hidden"><div class="personal-sheets-head"><div><div class="eyebrow">Seu arquivo de personagens</div><h2 style="margin:4px 0;font:700 24px Georgia,serif">Minhas fichas</h2><p class="panel-sub">Todas as suas fichas em um só lugar. Escolha uma para continuar.</p><span class="gallery-count" id="galleryCount">0 fichas</span></div><button class="btn primary" type="button" id="createSheetFromGallery">＋ Criar nova ficha</button></div><div class="gallery-tools"><input id="gallerySearch" type="search" placeholder="⌕ Buscar por nome, classe ou origem..." aria-label="Buscar fichas"><select id="galleryClassFilter" aria-label="Filtrar por classe"><option value="all">Todas as classes</option><option value="Superhumano">Superhumano</option><option value="Nexus">Nexus</option><option value="Humano">Humano</option></select><select id="gallerySort" aria-label="Ordenar fichas"><option value="recent">Mais recentes</option><option value="name">Nome A-Z</option><option value="oldest">Mais antigas</option></select></div><div id="personalSheetsGrid" class="personal-sheets-grid"></div><button class="btn hub-back" type="button" data-hub-back>← Página inicial</button></div></section><section id="campaignWorkspace" class="campaign-workspace hidden"></section>
     <section class="toolbar" aria-label="Gerenciar personagens">
       <select id="playerSelect" aria-label="Personagem ativo"></select>
       <button class="btn primary" id="newPlayerBtn">＋ Novo personagem</button>
@@ -549,7 +549,7 @@
         const skills = {};
         SKILLS.forEach(s => skills[s] = { trained:false, bonus:0 });
         return {
-          id: uid(), name, age:'', height:'', weight:'', origin:'', className:'', initiativeSuggestion:'',
+          id: uid(), name, updatedAt:Date.now(), age:'', height:'', weight:'', origin:'', className:'', initiativeSuggestion:'',
           attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
           hp:'', hpMax:'', hpCurrent:'', effortCurrent:'', effortMax:'', sanity:100, magicula:100, portrait:'', story:'', personality:'', notes:'', conditions:[], skills, equipment:['','','','',''], inventory:[], inventoryFilter:'all',
           dice:{sides:20,quantity:1,advantage:'normal',attributeTestMode:'highest',testAttribute:'forca'}, history:[], lastResult:null
@@ -559,7 +559,7 @@
         const base = makeCharacter(raw && raw.name ? String(raw.name) : 'Personagem importado');
         if (!raw || typeof raw !== 'object') return base;
         base.id = uid();
-        ['name','age','height','weight','origin','className','initiativeSuggestion','hp','hpMax','hpCurrent','effortCurrent','effortMax','portrait','story','personality','notes'].forEach(k => {
+        ['name','age','height','weight','origin','className','initiativeSuggestion','hp','hpMax','hpCurrent','effortCurrent','effortMax','portrait','story','personality','notes','updatedAt'].forEach(k => {
           if (raw[k] !== undefined && raw[k] !== null) base[k] = String(raw[k]);
         });
         // Compatibilidade com fichas antigas: o campo hp passa a representar a vida atual.
@@ -592,7 +592,7 @@
         try {
           const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
           if (raw && Array.isArray(raw.players) && raw.players.length) {
-            const players = raw.players.map(p => ({...p, id:String(p.id || uid())}));
+            const players = raw.players.map(p => ({...p, id:String(p.id || uid()), updatedAt:Number(p.updatedAt)||Date.now()}));
             return {players, activeId:players.some(p => p.id === raw.activeId) ? raw.activeId : players[0].id};
           }
         } catch (e) { console.warn('Não foi possível ler os dados salvos:', e); }
@@ -616,19 +616,15 @@
       const totalPoints = (p) => attributePoints(p) + skillPoints(p);
       const remaining = (p) => Math.max(0, 28 - totalPoints(p));
       const fmtTime = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      function setSaveStatus(message,kind='saved'){const label=$('saveLabel'),wrap=document.querySelector('.save-state');if(label)label.textContent=message;if(wrap){wrap.dataset.status=kind;wrap.title=message;}}
 
       function persist() {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          lastSavedAt = Date.now();
-          $('saveLabel').textContent = currentUser ? 'Salvando na nuvem...' : 'Salvo neste navegador';
-          if (currentUser) { scheduleCloudSave(); if(activeCampaign) scheduleCampaignSync(); }
-          return true;
-        } catch (e) {
-          $('saveLabel').textContent = 'Falha ao salvar';
-          showToast('Não foi possível salvar. Exporte um backup.');
-          return false;
-        }
+          if(active())active().updatedAt=Date.now();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));lastSavedAt=Date.now();
+          setSaveStatus(currentUser?'Alterações pendentes...':'Salvo neste dispositivo',currentUser?'pending':'local');
+          if(currentUser){scheduleCloudSave();if(activeCampaign)scheduleCampaignSync();}return true;
+        } catch(e){setSaveStatus('Falha ao salvar','error');showToast('Não foi possível salvar. Exporte um backup.');return false;}
       }
       function showToast(message) {
         const el = $('toast'); el.textContent = message; el.classList.add('show');
@@ -729,7 +725,7 @@
           </div>
           <section class="panel character-tab-panel ${activeSheetTab==='character'?'':'hidden'}" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="portrait-actions"><label class="btn primary" for="portraitFile">＋ Selecionar foto do dispositivo</label><input id="portraitFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><button type="button" class="btn small ${p.portrait?'':'hidden'}" data-action="remove-portrait">Remover foto</button><span class="portrait-hint">A imagem será otimizada e salva junto com a ficha.</span></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>${extraPanels}`;
         document.querySelectorAll('.sheet-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.sheetTab===activeSheetTab));
-        $('saveLabel').textContent = currentUser ? 'Sincronizado com a nuvem' : 'Salvo neste navegador';
+        if(!currentUser)setSaveStatus('Salvo neste dispositivo','local');
       }
 
       function switchPlayer(id) {
@@ -902,7 +898,7 @@
         if (error) throw error;
         cloudIds = new Set((data || []).map(row => row.id));
         if (data && data.length) {
-          const players = data.map(row => ({ ...(row.sheet || makeCharacter(row.name || 'Personagem')), id:(row.sheet && row.sheet.id) || uid(), cloudId:row.id, name:row.name || (row.sheet && row.sheet.name) || 'Sem nome' }));
+          const players = data.map(row => ({ ...(row.sheet || makeCharacter(row.name || 'Personagem')), id:(row.sheet && row.sheet.id) || uid(), cloudId:row.id, name:row.name || (row.sheet && row.sheet.name) || 'Sem nome', updatedAt:Number(row.sheet?.updatedAt)||Date.now() }));
           state = {players, activeId:players[0].id};
         } else {
           // Só importa fichas locais durante o primeiro cadastro, nunca ao entrar em outra conta.
@@ -921,12 +917,13 @@
         render();
         document.body.classList.add('authenticated');
         $('authUserLabel').textContent = '@' + (currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
-        $('saveLabel').textContent = 'Sincronizado com a nuvem';
+        setSaveStatus('Tudo salvo · '+fmtTime(Date.now()),'saved');
         await loadMyCampaigns(); showCampaignHub();
       }
       async function syncCloudNow() {
         if (!currentUser || cloudBusy) { cloudAgain = true; return; }
-        cloudBusy = true;
+        if(!navigator.onLine){setSaveStatus('Sem conexão · alterações guardadas localmente','offline');return;}
+        cloudBusy=true;setSaveStatus('Sincronizando com a nuvem...','saving');
         try {
           const kept = new Set();
           for (const p of state.players) {
@@ -948,10 +945,10 @@
           }
           cloudIds = kept;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          $('saveLabel').textContent = 'Sincronizado com a nuvem';
+          setSaveStatus('Tudo salvo · '+fmtTime(Date.now()),'saved');
         } catch (error) {
           console.error('Falha na sincronização:', error);
-          $('saveLabel').textContent = 'Erro ao sincronizar';
+          setSaveStatus('Falha na nuvem · cópia local preservada','error');
           showToast('Não foi possível sincronizar. Confira sua conexão.');
         } finally {
           cloudBusy = false;
@@ -978,7 +975,14 @@
       function showCampaignHub(){appView='hub';activeCampaign=null;$('campaignHub').classList.remove('hidden');$('campaignWorkspace').classList.add('hidden');document.querySelector('.toolbar').classList.add('hidden');document.querySelector('.sheet-tabs').classList.add('hidden');$('sheet').classList.add('hidden');document.querySelector('.footer-note').classList.add('hidden');$('backToHome').classList.add('hidden');showHubSection('home');renderCampaignList();}
       function openPersonalSheet(){appView='sheet';$('campaignHub').classList.add('hidden');$('campaignWorkspace').classList.add('hidden');document.querySelector('.toolbar').classList.remove('hidden');document.querySelector('.sheet-tabs').classList.remove('hidden');$('sheet').classList.remove('hidden');document.querySelector('.footer-note').classList.remove('hidden');$('backToHome').classList.remove('hidden');render();if(activeCampaign)scheduleCampaignSync();}
        function showPersonalSheets(){appView='sheets';activeCampaign=null;$('campaignHub').classList.remove('hidden');$('campaignWorkspace').classList.add('hidden');document.querySelector('.toolbar').classList.add('hidden');document.querySelector('.sheet-tabs').classList.add('hidden');$('sheet').classList.add('hidden');document.querySelector('.footer-note').classList.add('hidden');$('backToHome').classList.add('hidden');renderPersonalSheets();showHubSection('sheets');}
-       function renderPersonalSheets(){const grid=$('personalSheetsGrid');if(!grid)return;grid.innerHTML=state.players.map(p=>{const portrait=p.portrait?'<img src="'+esc(p.portrait)+'" alt="Retrato de '+esc(p.name||'personagem')+'">':'<span>✦</span>';const subtitle=[p.className,p.origin].filter(Boolean).map(esc).join(' · ')||'Personagem ainda sem classe ou origem';return '<button type="button" class="personal-sheet-card" data-open-personal-sheet="'+esc(p.id)+'"><div class="personal-sheet-art">'+portrait+'</div><div class="personal-sheet-info"><strong>'+esc(p.name||'Sem nome')+'</strong><small>'+subtitle+'</small></div></button>';}).join('')||'<div class="personal-sheet-empty">Você ainda não tem fichas. Crie a primeira para começar sua aventura.</div>';}
+       function renderPersonalSheets(){
+         const grid=$('personalSheetsGrid');if(!grid)return;
+         const query=($('gallerySearch')?.value||'').trim().toLocaleLowerCase('pt-BR'),classFilter=$('galleryClassFilter')?.value||'all',sort=$('gallerySort')?.value||'recent';
+         let list=state.players.filter(p=>[p.name,p.className,p.origin].join(' ').toLocaleLowerCase('pt-BR').includes(query)&&(classFilter==='all'||p.className===classFilter));
+         list.sort((a,b)=>sort==='name'?String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}):sort==='oldest'?(Number(a.updatedAt)||0)-(Number(b.updatedAt)||0):(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
+         const count=$('galleryCount');if(count)count.textContent=list.length+' de '+state.players.length+' ficha(s)';
+         grid.innerHTML=list.map(p=>{const portrait=p.portrait?'<img loading="lazy" src="'+esc(p.portrait)+'" alt="Retrato de '+esc(p.name||'personagem')+'">':'<span class="sheet-placeholder-mark">✦</span>',subtitle=[p.className,p.origin].filter(Boolean).map(esc).join(' · ')||'Classe e origem não definidas',updated=p.updatedAt?new Date(p.updatedAt).toLocaleDateString('pt-BR'):'Ainda não editada',points=Object.values(p.attributes||{}).reduce((n,v)=>n+(Number(v)||0),0)+Object.values(p.skills||{}).reduce((n,v)=>n+(Number(v?.bonus)||0),0);return '<button type="button" class="personal-sheet-card" data-open-personal-sheet="'+esc(p.id)+'"><div class="personal-sheet-art">'+portrait+'<span class="sheet-card-class">'+esc(p.className||'PERSONAGEM')+'</span></div><div class="personal-sheet-info"><strong>'+esc(p.name||'Sem nome')+'</strong><small>'+subtitle+'</small><span class="sheet-card-meta">'+points+' pontos · Editada em '+updated+'</span><span class="sheet-card-open">Abrir ficha <b>↗</b></span></div></button>';}).join('')||'<div class="personal-sheet-empty"><strong>Nenhuma ficha encontrada.</strong><span>'+(state.players.length?'Tente mudar a busca ou o filtro.':'Crie sua primeira ficha para começar a aventura.')+'</span></div>';
+       }
       function renderCampaignList(){const h=$('campaignList');if(!myCampaigns.length){h.innerHTML='<div class="panel-sub">Nenhuma campanha ainda. Crie uma mesa ou entre com um código.</div>';return;}h.innerHTML=myCampaigns.map(c=>'<article class="campaign-card"><strong>'+esc(c.name)+'</strong><small>'+(c.role==='master'?'Você é o mestre':'Você é jogador')+'</small>'+(c.role==='master'?'<div class="campaign-code">'+esc(c.invite_code)+'</div>':'')+'<button class="btn primary small" data-open-campaign="'+esc(c.id)+'">Abrir campanha</button></article>').join('');}
       async function loadMyCampaigns(){if(!currentUser)return;try{const a=await supabase.from('cronica_campaign_members').select('campaign_id,role').eq('user_id',currentUser.id);if(a.error)throw a.error;const ids=(a.data||[]).map(x=>x.campaign_id);if(!ids.length){myCampaigns=[];renderCampaignList();return;}const b=await supabase.from('cronica_campaigns').select('id,name,invite_code,owner_id').in('id',ids);if(b.error)throw b.error;myCampaigns=(b.data||[]).map(c=>({...c,role:a.data.find(m=>m.campaign_id===c.id)?.role||'player'}));renderCampaignList();}catch(err){myCampaigns=[];renderCampaignList();console.warn('Campanhas ainda não configuradas no Supabase:',err.message);}}
       async function refreshCampaignRoster(){if(!activeCampaign)return;const r=await supabase.from('cronica_campaign_snapshots').select('user_id,character_data,updated_at').eq('campaign_id',activeCampaign.id).order('updated_at',{ascending:false});if(r.error)throw r.error;campaignRoster=r.data||[];}
@@ -1048,7 +1052,12 @@
 
       $('createCampaignForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await supabase.rpc('cronica_create_campaign',{p_name:$('newCampaignName').value.trim()});if(r.error)throw r.error;await loadMyCampaigns();$('newCampaignName').value='';if(r.data&&r.data[0])await openCampaign(r.data[0].id);showToast('Campanha criada!');}catch(err){showToast('Erro: '+err.message);}});
       $('joinCampaignForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await supabase.rpc('cronica_join_campaign',{p_code:$('joinCampaignCode').value.trim().toUpperCase()});if(r.error)throw r.error;await loadMyCampaigns();$('joinCampaignCode').value='';if(r.data&&r.data[0])await openCampaign(r.data[0].id);showToast('Você entrou na campanha!');}catch(err){showToast('Erro: '+err.message);}});
-      $('backToHome').addEventListener('click',showCampaignHub);
+      $('backToHome').addEventListener('click',()=>{if(appView==='sheet'&&!activeCampaign)showPersonalSheets();else showCampaignHub();});
+      $('gallerySearch').addEventListener('input',renderPersonalSheets);
+      $('galleryClassFilter').addEventListener('change',renderPersonalSheets);
+      $('gallerySort').addEventListener('change',renderPersonalSheets);
+      window.addEventListener('online',()=>{if(currentUser){setSaveStatus('Conexão restaurada · sincronizando...','saving');scheduleCloudSave();}});
+      window.addEventListener('offline',()=>{if(currentUser)setSaveStatus('Sem conexão · alterações guardadas localmente','offline');});
       $('campaignHub').addEventListener('click',e=>{const go=e.target.closest('[data-hub-go]');if(go){if(go.dataset.hubGo==='sheets'){showPersonalSheets();return;}showHubSection(go.dataset.hubGo);return;}if(e.target.closest('[data-hub-back]')){showHubSection('home');return;}const card=e.target.closest('[data-open-personal-sheet]');if(card){switchPlayer(card.dataset.openPersonalSheet);openPersonalSheet();return;}if(e.target.closest('#createSheetFromGallery')){addPlayer();openPersonalSheet();return;}});
       $('campaignList').addEventListener('click',e=>{const b=e.target.closest('[data-open-campaign]');if(b)openCampaign(b.dataset.openCampaign).catch(err=>showToast(err.message));});
       $('campaignWorkspace').addEventListener('change',async e=>{const input=e.target.closest('[data-initiative-value]');if(!input)return;const value=Number(input.value);if(!Number.isFinite(value)){showToast('Valor inválido.');return;}const r=await supabase.from('cronica_campaign_initiative').update({initiative:value,updated_at:new Date().toISOString()}).eq('id',input.dataset.initiativeValue);if(r.error){showToast('Erro: '+r.error.message);return;}await refreshCampaignInitiative();renderCampaignWorkspace();});
