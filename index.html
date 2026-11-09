@@ -544,7 +544,7 @@
         const skills = {};
         SKILLS.forEach(s => skills[s] = { trained:false, bonus:0 });
         return {
-          id: uid(), name, age:'', height:'', weight:'', origin:'', className:'',
+          id: uid(), name, age:'', height:'', weight:'', origin:'', className:'', initiativeSuggestion:'',
           attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
           hp:'', hpMax:'', hpCurrent:'', effortCurrent:'', effortMax:'', sanity:100, magicula:100, portrait:'', story:'', personality:'', notes:'', conditions:[], skills, equipment:['','','','',''], inventory:[], inventoryFilter:'all',
           dice:{sides:20,quantity:1,advantage:'normal'}, history:[], lastResult:null
@@ -554,7 +554,7 @@
         const base = makeCharacter(raw && raw.name ? String(raw.name) : 'Personagem importado');
         if (!raw || typeof raw !== 'object') return base;
         base.id = uid();
-        ['name','age','height','weight','origin','className','hp','hpMax','hpCurrent','effortCurrent','effortMax','portrait','story','personality','notes'].forEach(k => {
+        ['name','age','height','weight','origin','className','initiativeSuggestion','hp','hpMax','hpCurrent','effortCurrent','effortMax','portrait','story','personality','notes'].forEach(k => {
           if (raw[k] !== undefined && raw[k] !== null) base[k] = String(raw[k]);
         });
         // Compatibilidade com fichas antigas: o campo hp passa a representar a vida atual.
@@ -670,6 +670,7 @@
                 <div class="field"><label for="charWeight">Peso</label><input id="charWeight" type="text" maxlength="16" placeholder="—" value="${esc(p.weight)}" data-field="weight"></div>
                 <div class="field origin"><label for="charOrigin">Origem</label><input id="charOrigin" type="text" maxlength="70" placeholder="Origem" value="${esc(p.origin)}" data-field="origin"></div>
                 <div class="field class"><label for="charClass">Classe</label><select id="charClass" data-field="className"><option value="" ${!p.className?'selected':''}>Selecione uma classe</option><option value="Superhumano" ${p.className==='Superhumano'?'selected':''}>Superhumano</option><option value="Nexus" ${p.className==='Nexus'?'selected':''}>Nexus</option><option value="Humano" ${p.className==='Humano'?'selected':''}>Humano</option></select></div>
+                <div class="field"><label for="initiativeSuggestion">Iniciativa (informada pelo jogador)</label><input id="initiativeSuggestion" type="number" min="-99" max="999" placeholder="Sua rolagem de iniciativa" value="${esc(p.initiativeSuggestion ?? '')}" data-field="initiativeSuggestion"><small class="panel-sub">O mestre confirma o valor oficial na ordem de iniciativa.</small></div>
                 <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / 28 gastos</div></div>
               </div></div>
             </section>
