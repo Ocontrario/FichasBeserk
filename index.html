@@ -699,7 +699,7 @@
                   <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
                   <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo (requer 4 pontos)</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}">${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
-                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste</label><select id="attributeTestMode"><option value="highest">Rolar 3d20 e ficar com o maior</option><option value="sum">Rolar 2d20 e somar</option></select></div>
+                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3d20 e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2d20 e somar</option></select></div>
                   <div class="die-summary">Com 4 pontos no atributo: escolha um estilo e receba +1 no resultado.</div>
                   <button type="button" class="btn primary roll-btn" id="attributeTestBtn" style="margin-bottom:12px">⚔ Fazer teste de atributo</button>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
@@ -822,7 +822,7 @@
           showToast('Esse teste especial exige 4 pontos no atributo escolhido.');
           return;
         }
-        const style = $('attributeTestMode').value === 'sum' ? 'sum' : 'highest';
+        const style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
         const rolls = style === 'sum'
           ? [secureRandom(20), secureRandom(20)]
           : [secureRandom(20), secureRandom(20), secureRandom(20)];
@@ -1084,6 +1084,7 @@
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
         if (e.target.id === 'rollMode') { active().dice.mode = e.target.value === 'highest' ? 'highest' : 'sum'; persist(); }
         if (e.target.id === 'rollAdvantage') { active().dice.advantage = ['advantage','disadvantage'].includes(e.target.value)?e.target.value:'normal'; persist(); }
+        if (e.target.id === 'attributeTestMode') { active().dice.attributeTestMode = e.target.value === 'sum' ? 'sum' : 'highest'; persist(); showToast(e.target.value === 'sum' ? 'Teste configurado: 2d20 somados.' : 'Teste configurado: 3d20, maior resultado.'); }
       });
       $('sheet').addEventListener('keydown', e => { if (e.target.id === 'diceExpression' && e.key === 'Enter') roll(); });
       // A ficha só é exibida depois que uma conta autenticada carregar seus próprios personagens.
