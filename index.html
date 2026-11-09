@@ -138,6 +138,16 @@
     .result-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .result-formula { color:var(--accent-strong); font-size:12px; font-weight:800; }
     .result-total { color:var(--accent-strong); font-family:Georgia,serif; font-size:27px; font-weight:700; }
+    .roll-dice { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:12px; }
+    .roll-die { width:66px; height:70px; display:grid; place-items:center; position:relative; isolation:isolate; }
+    .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:var(--accent); color:var(--accent-ink); clip-path:polygon(50% 1%,91% 25%,98% 72%,67% 99%,22% 91%,2% 51%,15% 12%); filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
+    .roll-die[data-sides="12"] .roll-die-shape { clip-path:polygon(50% 1%,96% 35%,79% 94%,21% 94%,4% 35%); }
+    .roll-die[data-sides="10"] .roll-die-shape { clip-path:polygon(50% 1%,95% 50%,50% 99%,5% 50%); }
+    .roll-die[data-sides="6"] .roll-die-shape { clip-path:polygon(18% 3%,82% 3%,97% 18%,97% 82%,82% 97%,18% 97%,3% 82%,3% 18%); }
+    .roll-die[data-sides="4"] .roll-die-shape { clip-path:polygon(50% 2%,98% 94%,2% 94%); }
+    .roll-die[data-sides="2"] .roll-die-shape { clip-path:circle(48% at 50% 50%); }
+    .roll-die-value { position:relative; z-index:1; font-family:Georgia,serif; font-size:23px; line-height:1; font-weight:800; color:var(--accent-ink); text-shadow:0 1px rgba(255,255,255,.18); }
+    .roll-die-label { position:absolute; z-index:1; bottom:8px; font-size:8px; font-weight:900; letter-spacing:.04em; color:var(--accent-ink); opacity:.78; }
     .result-values { margin-top:5px; color:#c3c8bd; font-size:11px; overflow-wrap:anywhere; line-height:1.6; }
     .history { margin-top:15px; }
     .history-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
@@ -561,7 +571,9 @@
         const history = p.history.length ? p.history.map(item => `<div class="history-item"><div class="history-left"><div class="history-expr">${esc(item.expression)}</div><div class="history-time">${esc(item.detail || '')} · ${fmtTime(item.timestamp)}</div></div><div class="history-total">${Number(item.total)}</div></div>`).join('') : '<div class="empty-history">Suas rolagens vão aparecer aqui.</div>';
         let result = '';
         if (p.lastResult && Array.isArray(p.lastResult.results)) {
-          result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="result-values">Dados: ${p.lastResult.results.map(Number).join(' · ')}${p.lastResult.detail ? '<br>'+esc(p.lastResult.detail) : ''}</div></div>`;
+          const diceResults = Array.isArray(p.lastResult.diceResults) ? p.lastResult.diceResults : p.lastResult.results.map(value => ({sides:p.dice.sides || 20,value}));
+          const diceMarkup = diceResults.map(die => `<div class="roll-die" data-sides="${Number(die.sides)}" aria-label="Resultado ${Number(die.value)} em um dado de ${Number(die.sides)} lados"><div class="roll-die-shape"><span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${Number(die.sides)}</span></div></div>`).join('');
+          result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         $('sheet').innerHTML = `
           <div class="left-stack">
@@ -670,7 +682,7 @@
         const mode = p.dice.mode === 'highest' ? 'highest' : 'sum';
         const tokens = expression.match(/[+-]?\d+d(?:20|12|10|6|4|2)|[+-]?\d+/ig) || [];
         let diceSum = 0; let modifierTotal = 0;
-        const results = []; const signedDice = []; const detail = [];
+        const results = []; const diceResults = []; const signedDice = []; const detail = [];
         for (const token of tokens) {
           const sign = token[0] === '-' ? -1 : 1;
           const part = token.replace(/^[+-]/,'');
@@ -681,7 +693,7 @@
             const rolls = Array.from({length:count},() => secureRandom(sides));
             diceSum += rolls.reduce((a,b)=>a+b,0) * sign;
             signedDice.push(...rolls.map(value => value * sign));
-            results.push(...rolls); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
+            results.push(...rolls); diceResults.push(...rolls.map(value => ({sides,value: value * sign}))); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
           } else {
             const n = Number(part) * sign;
             modifierTotal += n;
@@ -692,7 +704,7 @@
           ? (signedDice.length ? Math.max(...signedDice) : 0) + modifierTotal
           : diceSum + modifierTotal;
         const label = mode === 'highest' ? 'Perícia' : 'Dano';
-        const entry = {expression:`${label}: ${expression.replace(/([+-])/g,' $1 ').trim()}`,mode,results,total,timestamp:Date.now(),detail:detail.join(' | ')};
+        const entry = {expression:`${label}: ${expression.replace(/([+-])/g,' $1 ').trim()}`,mode,results,diceResults,total,timestamp:Date.now(),detail:detail.join(' | ')};
         p.lastResult = entry; p.history.unshift(entry); p.history = p.history.slice(0,20);
         persist(); render();
       }
