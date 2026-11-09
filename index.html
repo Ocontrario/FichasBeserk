@@ -499,6 +499,7 @@
       const DICE = [20,12,10,6,4,2];
       const $ = (id) => document.getElementById(id);
       let toastTimer;
+      let activeSheetTab = 'main';
 
       function uid() { return 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
       function makeCharacter(name = 'Novo personagem') {
@@ -615,7 +616,7 @@
           result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         $('sheet').innerHTML = `
-          <div class="main-tab-panel" style="display:contents">
+          <div class="main-tab-panel ${activeSheetTab==='main'?'':'hidden'}" style="display:contents">
           <div class="left-stack">
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Identificação</h2><span class="panel-sub">Dados do personagem</span></div>
@@ -663,7 +664,8 @@
             </section>
           </div>
           </div>
-          <section class="panel character-tab-panel hidden" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="field"><label for="portraitUrl">Imagem do personagem (URL)</label><input id="portraitUrl" type="text" value="${esc(p.portrait)}" data-field="portrait" placeholder="https://..."></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>`;
+          <section class="panel character-tab-panel ${activeSheetTab==='character'?'':'hidden'}" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="field"><label for="portraitUrl">Imagem do personagem (URL)</label><input id="portraitUrl" type="text" value="${esc(p.portrait)}" data-field="portrait" placeholder="https://..."></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>`;
+        document.querySelectorAll('.sheet-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.sheetTab===activeSheetTab));
         $('saveLabel').textContent = currentUser ? 'Sincronizado com a nuvem' : 'Salvo neste navegador';
       }
 
@@ -921,7 +923,7 @@
         }
       });
       $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
-      document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); const showCharacter=tab.dataset.sheetTab==='character'; const main=$('sheet').querySelector('.main-tab-panel'); const character=$('sheet').querySelector('.character-tab-panel'); if(main)main.classList.toggle('hidden',showCharacter); if(character)character.classList.toggle('hidden',!showCharacter); });
+      document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; activeSheetTab=tab.dataset.sheetTab; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); const showCharacter=activeSheetTab==='character'; const main=$('sheet').querySelector('.main-tab-panel'); const character=$('sheet').querySelector('.character-tab-panel'); if(main)main.classList.toggle('hidden',showCharacter); if(character)character.classList.toggle('hidden',!showCharacter); });
       $('sheet').addEventListener('click', e => { const filter=e.target.closest('[data-inventory-filter]'); if(filter){active().inventoryFilter=filter.dataset.inventoryFilter;persist();render();} });
       $('sheet').addEventListener('change', e => {
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
