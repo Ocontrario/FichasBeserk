@@ -32,13 +32,29 @@ alter table public.cronica_campaigns enable row level security;
 alter table public.cronica_campaign_members enable row level security;
 alter table public.cronica_campaign_snapshots enable row level security;
 
+create or replace function public.cronica_is_campaign_member(p_campaign_id uuid)
+returns boolean language sql stable security definer set search_path = public
+as $
+  select exists(select 1 from public.cronica_campaign_members
+    where campaign_id = p_campaign_id and user_id = auth.uid());
+$;
+
+create or replace function public.cronica_is_campaign_master(p_campaign_id uuid)
+returns boolean language sql stable security definer set search_path = public
+as $
+  select exists(select 1 from public.cronica_campaign_members
+    where campaign_id = p_campaign_id and user_id = auth.uid() and role = 'master');
+$;
+
+revoke all on function public.cronica_is_campaign_member(uuid) from public;
+revoke all on function public.cronica_is_campaign_master(uuid) from public;
+grant execute on function public.cronica_is_campaign_member(uuid) to authenticated;
+grant execute on function public.cronica_is_campaign_master(uuid) to authenticated;
+
 drop policy if exists "campaigns readable by members" on public.cronica_campaigns;
 create policy "campaigns readable by members" on public.cronica_campaigns
 for select to authenticated using (
-  owner_id = auth.uid() or exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = id and m.user_id = auth.uid()
-  )
+  owner_id = auth.uid() or public.cronica_is_campaign_member(id)
 );
 
 drop policy if exists "campaigns insert by owner" on public.cronica_campaigns;
@@ -52,59 +68,38 @@ for update to authenticated using (owner_id = auth.uid()) with check (owner_id =
 drop policy if exists "members readable by self or master" on public.cronica_campaign_members;
 create policy "members readable by self or master" on public.cronica_campaign_members
 for select to authenticated using (
-  user_id = auth.uid() or exists (
-    select 1 from public.cronica_campaign_members owner_member
-    where owner_member.campaign_id = campaign_id
-      and owner_member.user_id = auth.uid()
-      and owner_member.role = 'master'
-  )
+  user_id = auth.uid() or public.cronica_is_campaign_master(campaign_id)
 );
 
 drop policy if exists "master can add members" on public.cronica_campaign_members;
 create policy "master can add members" on public.cronica_campaign_members
 for insert to authenticated with check (
-  user_id = auth.uid() and role = 'master'
-  or exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = campaign_id and m.user_id = auth.uid() and m.role = 'master'
-  )
+  (user_id = auth.uid() and role = 'master' and exists (
+    select 1 from public.cronica_campaigns c where c.id = campaign_id and c.owner_id = auth.uid()
+  )) or public.cronica_is_campaign_master(campaign_id)
 );
 
 drop policy if exists "master can remove members" on public.cronica_campaign_members;
 create policy "master can remove members" on public.cronica_campaign_members
 for delete to authenticated using (
-  user_id = auth.uid() or exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = campaign_id and m.user_id = auth.uid() and m.role = 'master'
-  )
+  user_id = auth.uid() or public.cronica_is_campaign_master(campaign_id)
 );
 
 drop policy if exists "snapshots readable by campaign members" on public.cronica_campaign_snapshots;
 create policy "snapshots readable by campaign members" on public.cronica_campaign_snapshots
-for select to authenticated using (
-  exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = campaign_id and m.user_id = auth.uid()
-  )
-);
+for select to authenticated using (public.cronica_is_campaign_member(campaign_id));
 
 drop policy if exists "players write own snapshot" on public.cronica_campaign_snapshots;
 create policy "players write own snapshot" on public.cronica_campaign_snapshots
 for insert to authenticated with check (
-  user_id = auth.uid() and exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = campaign_id and m.user_id = auth.uid()
-  )
+  user_id = auth.uid() and public.cronica_is_campaign_member(campaign_id)
 );
 
 drop policy if exists "players update own snapshot" on public.cronica_campaign_snapshots;
 create policy "players update own snapshot" on public.cronica_campaign_snapshots
 for update to authenticated using (
-  user_id = auth.uid() and exists (
-    select 1 from public.cronica_campaign_members m
-    where m.campaign_id = campaign_id and m.user_id = auth.uid()
-  )
-) with check (user_id = auth.uid());
+  user_id = auth.uid() and public.cronica_is_campaign_member(campaign_id)
+) with check (user_id = auth.uid() and public.cronica_is_campaign_member(campaign_id));
 
 create or replace function public.cronica_create_campaign(p_name text)
 returns table(id uuid, name text, invite_code text, role text)
