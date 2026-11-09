@@ -828,6 +828,7 @@
         const attribute = ATTRIBUTES.find(([name]) => name === key);
         const points = Number(p.attributes[key]) || 0;
         const sides = Number(p.dice.sides) || 20;
+        if (points <= 0) { showToast('Esse atributo precisa ter pelo menos 1 ponto para realizar o teste.'); return; }
         let rolls = [];
         let total = 0;
         let diceResults = [];
@@ -835,7 +836,7 @@
         let detail = '';
 
         if (points < 4) {
-          const count = Math.max(1, points);
+          const count = points;
           rolls = Array.from({length:count}, () => secureRandom(sides));
           total = rolls.reduce((a,b) => a+b, 0);
           diceResults = rolls.map(value => ({sides,value,kept:true}));
