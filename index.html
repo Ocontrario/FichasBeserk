@@ -802,6 +802,7 @@
         await syncCloudNow();
         await supabase.auth.signOut();
         currentUser = null; cloudIds = new Set();
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
         document.body.classList.remove('authenticated');
         $('authPassword').value = ''; $('authUsername').value = ''; setAuthMode('login');
         state = loadState(); render();
