@@ -914,7 +914,7 @@
             if (action === 'attr-minus' && p.attributes[key] > 0) p.attributes[key]--;
             persist(); render();
           }
-          if (action === 'add-inventory') { if(p.inventory.length>=100){showToast('Limite de 100 itens.');return;} p.inventory.push({name:'',type:'general',weaponType:'',damage:'',range:'',description:'',editing:true});persist();render(); }
+          if (action === 'add-inventory') { if(p.inventory.length>=100){showToast('Limite de 100 itens.');return;} p.inventoryFilter='all'; p.inventory.push({name:'',type:'general',weaponType:'',damage:'',range:'',description:'',editing:true});persist();render(); }
           if (action === 'remove-inventory') { p.inventory.splice(Number(button.dataset.index),1);persist();render(); }
           if (action === 'toggle-inventory-edit') { const item=p.inventory[Number(button.dataset.index)];if(item){item.editing=!item.editing;persist();render();} }
           if (action === 'add-condition') { if(p.conditions.length<30)p.conditions.push('');persist();render(); }
