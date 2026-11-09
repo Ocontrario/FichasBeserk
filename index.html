@@ -484,13 +484,13 @@
         if (raw.hpCurrent === undefined && raw.hp !== undefined) base.hpCurrent = String(raw.hp);
         ATTRIBUTES.forEach(([key]) => {
           const n = Number(raw.attributes && raw.attributes[key]);
-          base.attributes[key] = Number.isFinite(n) ? Math.max(0, Math.min(28, Math.floor(n))) : 0;
+          base.attributes[key] = Number.isFinite(n) ? Math.max(0, Math.min(4, Math.floor(n))) : 0;
         });
-        // Imported characters keep their existing scores, even when a sheet exceeds the default point pool.
+        // Perícias importadas respeitam o limite de 0 a 5 pontos.
         SKILLS.forEach(s => {
           const v = raw.skills && raw.skills[s];
           if (typeof v === 'boolean') base.skills[s] = {trained:v,bonus:0};
-          else if (v && typeof v === 'object') base.skills[s] = {trained:!!v.trained,bonus:Number.isFinite(Number(v.bonus)) ? Math.max(-99,Math.min(99,Number(v.bonus))) : 0};
+          else if (v && typeof v === 'object') base.skills[s] = {trained:!!v.trained,bonus:Number.isFinite(Number(v.bonus)) ? Math.max(0,Math.min(5,Math.floor(Number(v.bonus)))) : 0};
         });
         if (Array.isArray(raw.equipment)) base.equipment = raw.equipment.map(x => String(x || '')).slice(0,100);
         if (raw.dice && DICE.includes(Number(raw.dice.sides))) base.dice.sides = Number(raw.dice.sides);
@@ -522,8 +522,10 @@
       let lastSavedAt = Date.now();
       const active = () => state.players.find(p => p.id === state.activeId) || state.players[0];
       const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      const totalPoints = (p) => ATTRIBUTES.reduce((n,[k]) => n + (Number(p.attributes[k]) || 0), 0);
-      const remaining = (p) => 28 - totalPoints(p);
+      const attributePoints = (p) => ATTRIBUTES.reduce((n,[k]) => n + (Number(p.attributes[k]) || 0), 0);
+      const skillPoints = (p) => SKILLS.reduce((n,s) => n + Math.max(0, Number(p.skills[s]?.bonus) || 0), 0);
+      const totalPoints = (p) => attributePoints(p) + skillPoints(p);
+      const remaining = (p) => Math.max(0, 28 - totalPoints(p));
       const fmtTime = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 
       function persist() {
@@ -549,11 +551,11 @@
         const attrs = ATTRIBUTES.map(([key,label,desc]) => `
           <div class="attribute-row">
             <div><div class="attribute-name">${label}</div><div class="attribute-desc">${desc}</div></div>
-            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${Number(p.attributes[key])||0}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0?'disabled':''}>＋</button></div>
+            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${Number(p.attributes[key])||0}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || Number(p.attributes[key]) >= 4?'disabled':''}>＋</button></div>
           </div>`).join('');
         const skillMarkup = SKILLS.map((skill,i) => {
           const val = p.skills[skill] || {trained:false,bonus:0};
-          return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="-99" max="99" value="${Number(val.bonus)||0}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
+          return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
         }).join('');
         const equipment = p.equipment.map((item,i) => `<div class="equipment-row"><span class="equipment-index">${i+1}.</span><input type="text" maxlength="90" placeholder="Item ${i+1}" value="${esc(item)}" data-equipment="${i}" aria-label="Equipamento ${i+1}"><button class="remove-equip" type="button" data-action="remove-equipment" data-index="${i}" title="Remover espaço" aria-label="Remover item ${i+1}">×</button></div>`).join('');
         const history = p.history.length ? p.history.map(item => `<div class="history-item"><div class="history-left"><div class="history-expr">${esc(item.expression)}</div><div class="history-time">${esc(item.detail || '')} · ${fmtTime(item.timestamp)}</div></div><div class="history-total">${Number(item.total)}</div></div>`).join('') : '<div class="empty-history">Suas rolagens vão aparecer aqui.</div>';
@@ -839,7 +841,7 @@
         if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
         if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
-        if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; p.skills[t.dataset.skillBonus].bonus = Math.max(-99,Math.min(99,Number(t.value)||0)); t.value = p.skills[t.dataset.skillBonus].bonus; persist(); }
+        if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; const skill = p.skills[t.dataset.skillBonus]; const previous = Math.max(0, Number(skill.bonus) || 0); const available = remaining(p) + previous; skill.bonus = Math.max(0, Math.min(5, available, Math.floor(Number(t.value) || 0))); t.value = skill.bonus; persist(); render(); }
       });
       $('sheet').addEventListener('click', e => {
         const dieButton = e.target.closest('[data-die]');
@@ -849,7 +851,7 @@
           const p = active(); const action = button.dataset.action;
           if (action === 'attr-plus' || action === 'attr-minus') {
             const key = button.dataset.key;
-            if (action === 'attr-plus' && remaining(p) > 0 && p.attributes[key] < 28) p.attributes[key]++;
+            if (action === 'attr-plus' && remaining(p) > 0 && p.attributes[key] < 4) p.attributes[key]++;
             if (action === 'attr-minus' && p.attributes[key] > 0) p.attributes[key]--;
             persist(); render();
           }
