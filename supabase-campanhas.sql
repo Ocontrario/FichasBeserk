@@ -116,7 +116,7 @@ begin
   if char_length(trim(p_name)) < 2 or char_length(trim(p_name)) > 70 then
     raise exception 'O nome precisa ter entre 2 e 70 caracteres.';
   end if;
-  new_code := upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 8));
+  new_code := upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
   insert into public.cronica_campaigns(name, invite_code, owner_id)
   values (trim(p_name), new_code, auth.uid()) returning cronica_campaigns.id into new_id;
   insert into public.cronica_campaign_members(campaign_id, user_id, role)
