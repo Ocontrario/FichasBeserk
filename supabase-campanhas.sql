@@ -26,12 +26,27 @@ create table if not exists public.cronica_campaign_snapshots (
   primary key (campaign_id, user_id)
 );
 
+create table if not exists public.cronica_campaign_initiative (
+  id uuid primary key default gen_random_uuid(),
+  campaign_id uuid not null references public.cronica_campaigns(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  participant_name text not null check (char_length(trim(participant_name)) between 1 and 70),
+  initiative integer not null default 0 check (initiative between -99 and 999),
+  is_npc boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint cronica_campaign_initiative_user_unique unique (campaign_id,user_id)
+);
+
+create index if not exists cronica_campaign_initiative_campaign_idx on public.cronica_campaign_initiative(campaign_id);
+
 create index if not exists cronica_campaign_members_user_idx on public.cronica_campaign_members(user_id);
 create index if not exists cronica_campaign_snapshots_campaign_idx on public.cronica_campaign_snapshots(campaign_id);
 
 alter table public.cronica_campaigns enable row level security;
 alter table public.cronica_campaign_members enable row level security;
 alter table public.cronica_campaign_snapshots enable row level security;
+alter table public.cronica_campaign_initiative enable row level security;
 
 create or replace function public.cronica_is_campaign_member(p_campaign_id uuid)
 returns boolean language sql stable security definer set search_path = public
@@ -88,6 +103,31 @@ drop policy if exists "master can remove members" on public.cronica_campaign_mem
 create policy "master can remove members" on public.cronica_campaign_members
 for delete to authenticated using (
   user_id = auth.uid() or public.cronica_is_campaign_master(campaign_id)
+);
+
+drop policy if exists "initiative readable by campaign members" on public.cronica_campaign_initiative;
+create policy "initiative readable by campaign members" on public.cronica_campaign_initiative
+for select to authenticated using (public.cronica_is_campaign_member(campaign_id));
+
+drop policy if exists "initiative insert by master or self" on public.cronica_campaign_initiative;
+create policy "initiative insert by master or self" on public.cronica_campaign_initiative
+for insert to authenticated with check (
+  public.cronica_is_campaign_master(campaign_id)
+  or (user_id = auth.uid() and is_npc = false and public.cronica_is_campaign_member(campaign_id))
+);
+
+drop policy if exists "initiative update by master or self" on public.cronica_campaign_initiative;
+create policy "initiative update by master or self" on public.cronica_campaign_initiative
+for update to authenticated using (
+  public.cronica_is_campaign_master(campaign_id) or user_id = auth.uid()
+) with check (
+  public.cronica_is_campaign_master(campaign_id) or (user_id = auth.uid() and is_npc = false)
+);
+
+drop policy if exists "initiative delete by master or self" on public.cronica_campaign_initiative;
+create policy "initiative delete by master or self" on public.cronica_campaign_initiative
+for delete to authenticated using (
+  public.cronica_is_campaign_master(campaign_id) or user_id = auth.uid()
 );
 
 drop policy if exists "snapshots readable by campaign members" on public.cronica_campaign_snapshots;
@@ -154,3 +194,4 @@ grant execute on function public.cronica_join_campaign(text) to authenticated;
 grant select, insert, update, delete on public.cronica_campaigns to authenticated;
 grant select, insert, delete on public.cronica_campaign_members to authenticated;
 grant select, insert, update on public.cronica_campaign_snapshots to authenticated;
+grant select, insert, update, delete on public.cronica_campaign_initiative to authenticated;
