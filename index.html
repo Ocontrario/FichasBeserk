@@ -674,7 +674,7 @@
       const attributePoints = (p) => ATTRIBUTES.reduce((n,[k]) => n + (Number(p.attributes[k]) || 0), 0);
       const skillPoints = (p) => SKILLS.reduce((n,s) => n + Math.max(0, Number(p.skills[s]?.bonus) || 0), 0);
       const totalPoints = (p) => attributePoints(p) + skillPoints(p);
-      const remaining = (p) => Math.max(0, 28 - totalPoints(p));
+      const remaining = (p) => Math.max(0, (Number.isFinite(Number(p.pointLimit)) ? Math.max(0, Math.floor(Number(p.pointLimit))) : 28) - totalPoints(p));
       const fmtTime = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       function setSaveStatus(message,kind='saved'){const label=$('saveLabel'),wrap=document.querySelector('.save-state');if(label)label.textContent=message;if(wrap){wrap.dataset.status=kind;wrap.title=message;}}
 
@@ -695,7 +695,7 @@
         if(!Array.isArray(p.inventory)) p.inventory=(p.equipment||[]).filter(x=>String(x||'').trim()).map(x=>({name:String(x),type:'general',weaponType:'',damage:'',range:'',description:'',editing:false}));
         if(!Array.isArray(p.diary))p.diary=[]; if(!Array.isArray(p.quests))p.quests=[];
         if(!Array.isArray(p.conditions)) p.conditions=[]; p.conditions=p.conditions.map(c=>typeof c==='string'?{name:c,color:'#b99a62',description:'',effect:''}:({name:String(c.name||''),color:/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#b99a62',description:String(c.description||''),effect:String(c.effect||'')}));
-        if(p.sanity===undefined)p.sanity=100; if(p.magicula===undefined)p.magicula=100;
+        if(p.sanity===undefined)p.sanity=100; if(p.magicula===undefined)p.magicula=100; if(!Number.isFinite(Number(p.pointLimit)))p.pointLimit=28;
         $('playerSelect').innerHTML = state.players.map(x => `<option value="${esc(x.id)}" ${x.id===state.activeId?'selected':''}>${esc(x.name || 'Sem nome')}</option>`).join('');
         const attrs = ATTRIBUTES.map(([key,label,desc]) => {
           const value = Number(p.attributes[key]) || 0;
@@ -739,11 +739,11 @@
                 <div class="field origin"><label for="charOrigin">Origem</label><input id="charOrigin" type="text" maxlength="70" placeholder="Origem" value="${esc(p.origin)}" data-field="origin"></div>
                 <div class="field class"><label for="charClass">Classe</label><select id="charClass" data-field="className"><option value="" ${!p.className?'selected':''}>Selecione uma classe</option><option value="Superhumano" ${p.className==='Superhumano'?'selected':''}>Superhumano</option><option value="Nexus" ${p.className==='Nexus'?'selected':''}>Nexus</option><option value="Humano" ${p.className==='Humano'?'selected':''}>Humano</option></select></div>
                 <div class="field"><label for="initiativeSuggestion">Iniciativa (informada pelo jogador)</label><input id="initiativeSuggestion" type="number" min="-99" max="999" placeholder="Sua rolagem de iniciativa" value="${esc(p.initiativeSuggestion ?? '')}" data-field="initiativeSuggestion"><small class="panel-sub">O mestre confirma o valor oficial na ordem de iniciativa.</small></div>
-                <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / 28 gastos</div></div>
+                <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / ${Math.max(0,Math.floor(Number(p.pointLimit)||0))} gastos</div><label class="caption" for="pointLimitInput">Total disponível</label><input id="pointLimitInput" type="number" min="0" max="9999" step="1" value="${Math.max(0,Math.floor(Number(p.pointLimit)||0))}" aria-label="Total de pontos disponíveis" style="width:76px;text-align:center;padding:5px 7px;font-size:13px"></div>
               </div></div>
             </section>
             <section class="panel">
-              <div class="panel-head"><h2 class="panel-title">Atributos</h2><span class="panel-sub">Distribua os 28 pontos</span></div>
+              <div class="panel-head"><h2 class="panel-title">Atributos</h2><span class="panel-sub">Distribua seus pontos disponíveis</span></div>
               <div class="attributes">${attrs}</div>
             </section>
 
@@ -1167,6 +1167,7 @@
       $('importFile').addEventListener('change', e => importFile(e.target.files && e.target.files[0]));
       $('sheet').addEventListener('change', e => {
         const p = active(); const t = e.target;
+        if(t.id==='pointLimitInput'){p.pointLimit=Math.max(0,Math.min(9999,Math.floor(Number(t.value)||0)));persist();render();showToast('Limite de pontos atualizado!');return;}
         if(t.id==='portraitFile' && t.files && t.files[0]){ const file=t.files[0]; if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)){showToast('Escolha JPG, PNG, WebP ou GIF.');t.value='';return;} if(file.size>12*1024*1024){showToast('A imagem precisa ter menos de 12 MB.');t.value='';return;} const reader=new FileReader(); reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,1200/img.height),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);p.portrait=canvas.toDataURL('image/jpeg',.8);persist();render();showToast('Retrato atualizado!');};img.onerror=()=>showToast('Não foi possível abrir essa imagem.');img.src=String(reader.result);};reader.onerror=()=>showToast('Não foi possível ler a imagem.');reader.readAsDataURL(file); }
         if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait','className'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
