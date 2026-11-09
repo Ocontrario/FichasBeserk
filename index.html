@@ -519,7 +519,7 @@
           id: uid(), name, age:'', height:'', weight:'', origin:'', className:'',
           attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
           hp:'', hpMax:'', hpCurrent:'', effortCurrent:'', effortMax:'', sanity:100, magicula:100, portrait:'', story:'', personality:'', notes:'', conditions:[], skills, equipment:['','','','',''], inventory:[], inventoryFilter:'all',
-          dice:{sides:20,quantity:1}, history:[], lastResult:null
+          dice:{sides:20,quantity:1,advantage:'normal'}, history:[], lastResult:null
         };
       }
       function normalizeCharacter(raw) {
@@ -663,6 +663,7 @@
                 <div class="roll-controls" style="display:block">
                   <div class="field"><label for="diceExpression">Expressão de rolagem</label><input id="diceExpression" type="text" placeholder="Ex.: 1d20 + 1d12 + 10" value="${esc(p.dice.expression || `${p.dice.quantity}d${activeDie}`)}" /></div>
                   <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
+                  <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
                 </div>
@@ -747,7 +748,7 @@
           if (dice) {
             const count = Number(dice[1]), sides = Number(dice[2]);
             if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
-            const rolls = Array.from({length:count},() => secureRandom(sides));
+            const rolls = Array.from({length:count},() => {if(sides===20&&count===1&&p.dice.advantage&&p.dice.advantage!=='normal'){const a=secureRandom(20),b=secureRandom(20),chosen=p.dice.advantage==='advantage'?Math.max(a,b):Math.min(a,b);detail.push((p.dice.advantage==='advantage'?'Vantagem':'Desvantagem')+': ['+a+', '+b+'] → '+chosen);return chosen;}return secureRandom(sides);});
             diceSum += rolls.reduce((a,b)=>a+b,0) * sign;
             signedDice.push(...rolls.map(value => value * sign));
             results.push(...rolls); diceResults.push(...rolls.map(value => ({sides,value: value * sign}))); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
@@ -960,6 +961,7 @@
       $('sheet').addEventListener('change', e => {
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
         if (e.target.id === 'rollMode') { active().dice.mode = e.target.value === 'highest' ? 'highest' : 'sum'; persist(); }
+        if (e.target.id === 'rollAdvantage') { active().dice.advantage = ['advantage','disadvantage'].includes(e.target.value)?e.target.value:'normal'; persist(); }
       });
       $('sheet').addEventListener('keydown', e => { if (e.target.id === 'diceExpression' && e.key === 'Enter') roll(); });
       // A ficha só é exibida depois que uma conta autenticada carregar seus próprios personagens.
