@@ -592,7 +592,7 @@
       function render() {
         const p = active();
         if(!Array.isArray(p.inventory)) p.inventory=(p.equipment||[]).filter(x=>String(x||'').trim()).map(x=>({name:String(x),type:'general',weaponType:'',damage:'',range:'',description:'',editing:false}));
-        if(!Array.isArray(p.conditions)) p.conditions=[];
+        if(!Array.isArray(p.conditions)) p.conditions=[]; p.conditions=p.conditions.map(c=>typeof c==='string'?{name:c,color:'#b99a62',description:'',effect:''}:({name:String(c.name||''),color:/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#b99a62',description:String(c.description||''),effect:String(c.effect||'')}));
         if(p.sanity===undefined)p.sanity=100; if(p.magicula===undefined)p.magicula=100;
         $('playerSelect').innerHTML = state.players.map(x => `<option value="${esc(x.id)}" ${x.id===state.activeId?'selected':''}>${esc(x.name || 'Sem nome')}</option>`).join('');
         const attrs = ATTRIBUTES.map(([key,label,desc]) => `
@@ -902,7 +902,7 @@
         if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait','className'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
         if (t.dataset.inventoryField) { const item=p.inventory[Number(t.dataset.index)]; if(item){item[t.dataset.inventoryField]=t.value;persist();if(t.dataset.inventoryField==='type')render();} }
-        if (t.dataset.conditionField) { const i=Number(t.dataset.index); let c=p.conditions[i]; if(typeof c==='string')c=p.conditions[i]={name:c,color:'#b99a62',description:'',effect:''}; if(c){c[t.dataset.conditionField]=t.value;persist();if(t.dataset.conditionField==='color')render();} }
+        if (t.dataset.conditionField) { const i=Number(t.dataset.index); let c=p.conditions[i]; if(typeof c==='string')c=p.conditions[i]={name:c,color:'#b99a62',description:'',effect:''}; if(c){c[t.dataset.conditionField]=t.value;persist();render();} }
         if (t.dataset.field==='sanity'||t.dataset.field==='magicula') { p[t.dataset.field]=Math.max(0,Math.min(100,Number(t.value)||0)); persist(); render(); }
         if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
         if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; const skill = p.skills[t.dataset.skillBonus]; const previous = Math.max(0, Number(skill.bonus) || 0); const available = remaining(p) + previous; skill.bonus = Math.max(0, Math.min(5, available, Math.floor(Number(t.value) || 0))); t.value = skill.bonus; persist(); render(); }
