@@ -552,7 +552,7 @@
           id: uid(), name, age:'', height:'', weight:'', origin:'', className:'', initiativeSuggestion:'',
           attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
           hp:'', hpMax:'', hpCurrent:'', effortCurrent:'', effortMax:'', sanity:100, magicula:100, portrait:'', story:'', personality:'', notes:'', conditions:[], skills, equipment:['','','','',''], inventory:[], inventoryFilter:'all',
-          dice:{sides:20,quantity:1,advantage:'normal'}, history:[], lastResult:null
+          dice:{sides:20,quantity:1,advantage:'normal',attributeTestMode:'highest',testAttribute:'forca'}, history:[], lastResult:null
         };
       }
       function normalizeCharacter(raw) {
@@ -580,6 +580,9 @@
         if (Array.isArray(raw.inventory)) base.inventory = raw.inventory.map(x=>({name:String(x.name||''),type:['weapon','ammo','mission','equipment','consumable','general'].includes(x.type)?x.type:'general',weaponType:String(x.weaponType||''),damage:String(x.damage||''),range:String(x.range||''),description:String(x.description||''),equipped:!!x.equipped,editing:!!x.editing})).slice(0,100);
         else base.inventory = base.equipment.filter(x=>String(x||'').trim()).map(x=>({name:String(x),type:'general',weaponType:'',damage:'',range:'',description:'',editing:false}));
         if (raw.dice && DICE.includes(Number(raw.dice.sides))) base.dice.sides = Number(raw.dice.sides);
+        if (raw.dice && ['sum','highest'].includes(raw.dice.attributeTestMode)) base.dice.attributeTestMode = raw.dice.attributeTestMode;
+        if (raw.dice && ATTRIBUTES.some(([key]) => key === raw.dice.testAttribute)) base.dice.testAttribute = raw.dice.testAttribute;
+        if (raw.dice && ['normal','advantage','disadvantage'].includes(raw.dice.advantage)) base.dice.advantage = raw.dice.advantage;
         if (raw.dice && Number.isFinite(Number(raw.dice.quantity))) base.dice.quantity = Math.max(1,Math.min(50,Math.floor(Number(raw.dice.quantity))));
         if (Array.isArray(raw.history)) base.history = raw.history.slice(0,20).filter(x => x && typeof x === 'object').map(x => ({expression:String(x.expression || ''), total:Number(x.total)||0, results:Array.isArray(x.results)?x.results.map(Number).filter(Number.isFinite):[], timestamp:Number(x.timestamp)||Date.now()}));
         if (raw.lastResult && typeof raw.lastResult === 'object') base.lastResult = raw.lastResult;
@@ -844,7 +847,8 @@
           modeLabel = points + 'd' + sides + ' somados';
           detail = '[' + rolls.join(', ') + '] → soma dos dados = ' + total;
         } else {
-          style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
+          style = ($('attributeTestMode')?.value || p.dice.attributeTestMode) === 'sum' ? 'sum' : 'highest';
+          p.dice.attributeTestMode = style;
           if (style === 'sum') {
             rolls = [secureRandom(sides), secureRandom(sides)];
             const diceTotal = rolls[0] + rolls[1];
