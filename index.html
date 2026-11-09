@@ -146,12 +146,12 @@
     @media (prefers-reduced-motion:reduce) { .roll-die { animation:none; } }
     .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:var(--accent); color:var(--accent-ink); clip-path:polygon(50% 1%,91% 25%,98% 72%,67% 99%,22% 91%,2% 51%,15% 12%); filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
     .roll-die[data-sides="20"] .roll-die-shape { inset:0; clip-path:none; background:none; filter:none; }
-    .d20-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-    .d20-body { fill:var(--accent); stroke:rgba(12,14,12,.9); stroke-width:1.6; stroke-linejoin:round; }
-    .d20-facets { fill:none; stroke:rgba(12,14,12,.9); stroke-width:1.35; stroke-linecap:round; stroke-linejoin:round; }
+    .d20-svg { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
+    .d20-body { fill:var(--accent); stroke:rgba(12,14,12,.9); stroke-width:1.8; stroke-linejoin:round; }
+    .d20-facets { fill:none; stroke:rgba(12,14,12,.9); stroke-width:1.55; stroke-linecap:round; stroke-linejoin:round; }
     .critical-low .d20-body { fill:#d94b55; } .critical-high .d20-body { fill:#45b879; }
-    .roll-die[data-sides="20"] .roll-die-value { top:-2px; font-size:21px; color:var(--accent-ink); text-shadow:0 1px 2px rgba(0,0,0,.25); }
-    .roll-die[data-sides="20"] .roll-die-label { bottom:12px; color:var(--accent-ink); }
+    .roll-die[data-sides="20"] .roll-die-value { position:absolute; left:50%; top:48%; transform:translate(-50%,-50%); margin:0; font-size:21px; line-height:1; color:var(--accent-ink); text-shadow:0 1px 2px rgba(0,0,0,.25); }
+    .roll-die[data-sides="20"] .roll-die-label { bottom:8px; color:var(--accent-ink); }
     .roll-die[data-sides="12"] .roll-die-shape { clip-path:polygon(50% 1%,96% 35%,79% 94%,21% 94%,4% 35%); }
     .roll-die[data-sides="10"] .roll-die-shape { clip-path:polygon(50% 1%,95% 50%,50% 99%,5% 50%); }
     .roll-die[data-sides="6"] .roll-die-shape { clip-path:polygon(18% 3%,82% 3%,97% 18%,97% 82%,82% 97%,18% 97%,3% 82%,3% 18%); }
@@ -620,7 +620,7 @@
         let result = '';
         if (p.lastResult && Array.isArray(p.lastResult.results)) {
           const diceResults = Array.isArray(p.lastResult.diceResults) ? p.lastResult.diceResults : p.lastResult.results.map(value => ({sides:p.dice.sides || 20,value}));
-          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape">${sides===20?`<svg class="d20-svg" viewBox="0 0 100 100" aria-hidden="true"><path class="d20-body" d="M50 2 L92 24 L92 68 L70 91 L50 99 L30 91 L8 68 L8 24 Z"/><path class="d20-facets" d="M50 2 L28 38 L72 38 Z M8 24 L28 38 L8 68 M92 24 L72 38 L92 68 M8 68 L28 38 L50 78 L72 38 L92 68 M8 68 L50 78 L50 99 M92 68 L50 78"/></svg>`:'' }<span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
+          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape">${sides===20?`<svg class="d20-svg" viewBox="0 0 100 100" aria-hidden="true"><path class="d20-body" d="M50 2 L92 24 L92 68 L70 91 L50 99 L30 91 L8 68 L8 24 Z"/><path class="d20-facets" d="M50 2 L28 38 L72 38 Z M8 24 L28 38 L8 68 L8 68 M92 24 L72 38 L92 68 M28 38 L72 38 M28 38 L50 78 L72 38 M8 68 L28 38 M92 68 L72 38 M8 68 L50 78 L50 99 M92 68 L50 78 L50 99 M8 68 L50 78 L92 68 M30 91 L50 99 L70 91"/></svg>`:'' }<span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
           result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         $('sheet').innerHTML = `
