@@ -99,6 +99,11 @@
     .stepper button { width:30px; height:30px; border:1px solid #4a5148; border-radius:8px; color:var(--accent); background:#191d19; font-size:17px; line-height:1; }
     .stepper button:hover { border-color:var(--accent); background:#2c3028; }
     .stepper .value { min-width:25px; text-align:center; font-family:Georgia,serif; font-size:22px; font-weight:700; }
+    .attribute-peak { position:relative; }
+    .attribute-peak .attribute-name { color:var(--accent-strong); text-shadow:0 0 12px rgba(234,215,169,.35); }
+    .peak-mark { display:inline-grid; place-items:center; width:19px; height:19px; margin-left:5px; color:#201d15; background:linear-gradient(145deg,#fff1b8,#c99b42); border-radius:50%; font:900 12px/1 Georgia,serif; vertical-align:2px; box-shadow:0 0 0 2px rgba(234,215,169,.18),0 0 16px rgba(234,215,169,.5); animation:peakReveal .8s ease-out both; }
+    .attribute-peak .stepper .value { color:var(--accent-strong); text-shadow:0 0 13px rgba(234,215,169,.65); }
+    @keyframes peakReveal { 0% { transform:scale(.2) rotate(-90deg); opacity:0; } 65% { transform:scale(1.3) rotate(12deg); opacity:1; } 100% { transform:scale(1) rotate(0); opacity:1; } }
     .hp-wrap { display:flex; align-items:center; gap:13px; padding:17px 19px; }
     .heart { color:#d88c87; font-size:27px; line-height:1; }
     .hp-wrap label { color:#c4c9bf; font-size:12px; font-weight:800; }
@@ -561,7 +566,7 @@
         if (raw.hpCurrent === undefined && raw.hp !== undefined) base.hpCurrent = String(raw.hp);
         ATTRIBUTES.forEach(([key]) => {
           const n = Number(raw.attributes && raw.attributes[key]);
-          base.attributes[key] = Number.isFinite(n) ? Math.max(0, Math.min(4, Math.floor(n))) : 0;
+          base.attributes[key] = Number.isFinite(n) ? Math.max(0, Math.min(5, Math.floor(n))) : 0;
         });
         // Perícias importadas respeitam o limite de 0 a 5 pontos.
         SKILLS.forEach(s => {
@@ -633,11 +638,15 @@
         if(!Array.isArray(p.conditions)) p.conditions=[]; p.conditions=p.conditions.map(c=>typeof c==='string'?{name:c,color:'#b99a62',description:'',effect:''}:({name:String(c.name||''),color:/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#b99a62',description:String(c.description||''),effect:String(c.effect||'')}));
         if(p.sanity===undefined)p.sanity=100; if(p.magicula===undefined)p.magicula=100;
         $('playerSelect').innerHTML = state.players.map(x => `<option value="${esc(x.id)}" ${x.id===state.activeId?'selected':''}>${esc(x.name || 'Sem nome')}</option>`).join('');
-        const attrs = ATTRIBUTES.map(([key,label,desc]) => `
-          <div class="attribute-row">
-            <div><div class="attribute-name">${label}</div><div class="attribute-desc">${desc}</div></div>
-            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${Number(p.attributes[key])||0}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || Number(p.attributes[key]) >= 4?'disabled':''}>＋</button></div>
-          </div>`).join('');
+        const attrs = ATTRIBUTES.map(([key,label,desc]) => {
+          const value = Number(p.attributes[key]) || 0;
+          const atPeak = value >= 5;
+          return `
+          <div class="attribute-row ${atPeak?'attribute-peak':''}">
+            <div><div class="attribute-name">${label} ${atPeak?'<span class="peak-mark" title="Atributo no limite máximo">✦</span>':''}</div><div class="attribute-desc">${desc}</div></div>
+            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${value}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || value >= 5?'disabled':''}>＋</button></div>
+          </div>`;
+        }).join('');
         const skillMarkup = [...SKILLS].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'})).map((skill,i) => {
           const val = p.skills[skill] || {trained:false,bonus:0};
           return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
@@ -698,9 +707,9 @@
                   <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
                   <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
-                  <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo (requer 4 pontos)</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}">${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
-                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3d20 e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2d20 e somar</option></select></div>
-                  <div class="die-summary">Com 4 pontos no atributo: escolha um estilo e receba +1 no resultado.</div>
+                  <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}">${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
+                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste (4+ pontos)</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3 dados e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2 dados e somar</option></select></div>
+                  <div class="die-summary">O teste usa o dado selecionado acima. Com menos de 4 pontos, a quantidade de dados acompanha o atributo. Com 4 ou mais, escolha um estilo especial.</div>
                   <button type="button" class="btn primary roll-btn" id="attributeTestBtn" style="margin-bottom:12px">⚔ Fazer teste de atributo</button>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
                 </div>
@@ -818,26 +827,40 @@
         const key = $('testAttribute').value;
         const attribute = ATTRIBUTES.find(([name]) => name === key);
         const points = Number(p.attributes[key]) || 0;
+        const sides = Number(p.dice.sides) || 20;
+        let rolls = [];
+        let total = 0;
+        let diceResults = [];
+        let modeLabel = '';
+        let detail = '';
+
         if (points < 4) {
-          showToast('Esse teste especial exige 4 pontos no atributo escolhido.');
-          return;
+          const count = Math.max(1, points);
+          rolls = Array.from({length:count}, () => secureRandom(sides));
+          total = rolls.reduce((a,b) => a+b, 0);
+          diceResults = rolls.map(value => ({sides,value,kept:true}));
+          modeLabel = count + 'd' + sides + ' somados';
+          detail = '[' + rolls.join(', ') + '] → soma dos dados';
+        } else {
+          const style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
+          rolls = style === 'sum'
+            ? [secureRandom(sides), secureRandom(sides)]
+            : [secureRandom(sides), secureRandom(sides), secureRandom(sides)];
+          const chosen = style === 'sum' ? rolls.reduce((a,b)=>a+b,0) : Math.max(...rolls);
+          const bonus = style === 'sum' ? Math.max(0, points - 3) : 0;
+          total = chosen + bonus;
+          diceResults = rolls.map(value => ({sides,value,kept:style==='sum'||value===chosen}));
+          modeLabel = style === 'sum' ? '2d' + sides + ' somados' : '3d' + sides + ' · maior resultado';
+          detail = '[' + rolls.join(', ') + '] → ' + chosen + (bonus ? ' + ' + bonus + ' de atributo' : '') + ' = ' + total;
         }
-        const style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
-        const rolls = style === 'sum'
-          ? [secureRandom(20), secureRandom(20)]
-          : [secureRandom(20), secureRandom(20), secureRandom(20)];
-        const chosen = style === 'sum' ? rolls.reduce((a,b)=>a+b,0) : Math.max(...rolls);
-        const total = chosen + 1;
-        const diceResults = rolls.map(value => ({sides:20,value,kept:style==='sum'||value===chosen}));
-        const modeLabel = style === 'sum' ? '2d20 somados' : '3d20 · maior resultado';
         const entry = {
-          expression: 'Teste de ' + attribute[1] + ' · ' + modeLabel + ' +1',
-          mode: style,
+          expression: 'Teste de ' + attribute[1] + ' · ' + modeLabel + (points >= 4 && p.dice.attributeTestMode === 'sum' ? ' · bônus +' + Math.max(0,points-3) : ''),
+          mode: p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest',
           results: rolls,
           diceResults,
           total,
           timestamp: Date.now(),
-          detail: '[' + rolls.join(', ') + '] → ' + chosen + ' + 1 de atributo = ' + total
+          detail
         };
         p.lastResult = entry;
         p.history.unshift(entry);
@@ -1059,7 +1082,7 @@
           const p = active(); const action = button.dataset.action;
           if (action === 'attr-plus' || action === 'attr-minus') {
             const key = button.dataset.key;
-            if (action === 'attr-plus' && remaining(p) > 0 && p.attributes[key] < 4) p.attributes[key]++;
+            if (action === 'attr-plus' && remaining(p) > 0 && p.attributes[key] < 5) p.attributes[key]++;
             if (action === 'attr-minus' && p.attributes[key] > 0) p.attributes[key]--;
             persist(); render();
           }
