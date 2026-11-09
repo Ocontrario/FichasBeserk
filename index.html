@@ -1189,7 +1189,7 @@
         if(t.hasAttribute('data-quest-done')){const i=Number(t.dataset.index);if(p.quests[i]){p.quests[i].done=t.checked;persist();render();}}
         if (t.dataset.conditionField) { const i=Number(t.dataset.index); let c=p.conditions[i]; if(typeof c==='string')c=p.conditions[i]={name:c,color:'#b99a62',description:'',effect:''}; if(c){c[t.dataset.conditionField]=t.value;persist();render();} }
         if (t.dataset.field==='sanity'||t.dataset.field==='magicula') { p[t.dataset.field]=Math.max(0,Math.min(100,Number(t.value)||0)); persist(); render(); }
-        if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
+        if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); render(); }
         if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; const skill = p.skills[t.dataset.skillBonus]; const previous = Math.max(0, Number(skill.bonus) || 0); const available = remaining(p) + previous; skill.bonus = Math.max(0, Math.min(5, available, Math.floor(Number(t.value) || 0))); t.value = skill.bonus; persist(); render(); }
       });
       $('sheet').addEventListener('click', e => {
