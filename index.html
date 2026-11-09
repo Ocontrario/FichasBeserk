@@ -139,7 +139,11 @@
     .result-formula { color:var(--accent-strong); font-size:12px; font-weight:800; }
     .result-total { color:var(--accent-strong); font-family:Georgia,serif; font-size:27px; font-weight:700; }
     .roll-dice { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:12px; }
-    .roll-die { width:66px; height:70px; display:grid; place-items:center; position:relative; isolation:isolate; }
+    .roll-die { width:66px; height:70px; display:grid; place-items:center; position:relative; isolation:isolate; animation:diceReveal .48s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes diceReveal { 0% { transform:translateY(-16px) rotate(-24deg) scale(.65); opacity:0; } 65% { transform:translateY(3px) rotate(8deg) scale(1.08); opacity:1; } 100% { transform:translateY(0) rotate(0) scale(1); opacity:1; } }
+    .roll-die.critical-low .roll-die-shape { background:#d94b55; color:#fff; } .roll-die.critical-high .roll-die-shape { background:#45b879; color:#102319; }
+    .roll-die.critical-low .roll-die-value,.roll-die.critical-high .roll-die-value { color:inherit; }
+    @media (prefers-reduced-motion:reduce) { .roll-die { animation:none; } }
     .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:var(--accent); color:var(--accent-ink); clip-path:polygon(50% 1%,91% 25%,98% 72%,67% 99%,22% 91%,2% 51%,15% 12%); filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
     .roll-die[data-sides="12"] .roll-die-shape { clip-path:polygon(50% 1%,96% 35%,79% 94%,21% 94%,4% 35%); }
     .roll-die[data-sides="10"] .roll-die-shape { clip-path:polygon(50% 1%,95% 50%,50% 99%,5% 50%); }
@@ -163,6 +167,29 @@
     .toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%,20px); opacity:0; pointer-events:none; padding:11px 15px; color:#1d2019; background:var(--accent-strong); border-radius:10px; font-size:12px; font-weight:800; box-shadow:var(--shadow); transition:.2s; z-index:20; }
     .toast.show { opacity:1; transform:translate(-50%,0); }
     .hidden { display:none !important; }
+    .sheet-tabs { display:flex; gap:8px; margin-bottom:10px; }
+    .sheet-tab { border:1px solid var(--line); background:var(--panel); color:var(--muted); border-radius:9px; padding:9px 15px; font-weight:800; font-size:12px; }
+    .sheet-tab.active { color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
+    .resource-list { display:grid; gap:12px; padding:12px 16px 15px; }
+    .resource-card { --resource-color:#d94b55; display:grid; gap:7px; }
+    .resource-card.sanity { --resource-color:#a979e8; } .resource-card.effort { --resource-color:#e69a43; }
+    .resource-head { display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--resource-color); font-size:12px; font-weight:900; }
+    .resource-values { display:flex; align-items:center; gap:7px; } .resource-values input { width:68px; text-align:center; }
+    .resource-track { height:12px; overflow:hidden; background:#111411; border:1px solid var(--line); border-radius:20px; }
+    .resource-fill { height:100%; width:0; background:var(--resource-color); border-radius:20px; transition:width .2s; }
+    .resource-percent { color:var(--muted); font-size:10px; text-align:right; }
+    .inventory-filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+    .inventory-filter { border:1px solid var(--line); background:#171a17; color:var(--muted); border-radius:8px; padding:6px 9px; font-size:10px; font-weight:800; }
+    .inventory-filter.active { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+    .inventory-row { border:1px solid var(--line-soft); border-radius:10px; padding:9px; margin-bottom:8px; display:grid; gap:7px; }
+    .inventory-row-head { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:center; }
+    .inventory-row input,.inventory-row select { width:100%; } .weapon-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+    .inventory-readonly { color:var(--text); font-size:12px; font-weight:800; }
+    .character-grid { display:grid; grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr); gap:14px; padding:14px; }
+    .portrait-box { display:grid; gap:8px; align-content:start; } .portrait-preview { width:100%; aspect-ratio:3/4; max-height:360px; object-fit:cover; border-radius:10px; border:1px solid var(--line); background:#151815; }
+    .character-fields { display:grid; gap:10px; } .character-fields textarea { width:100%; min-height:78px; resize:vertical; color:var(--text); background:#171a17; border:1px solid #444b43; border-radius:9px; padding:9px; font:inherit; }
+    .condition-list { display:grid; gap:6px; } .condition-row { display:flex; gap:7px; align-items:center; } .condition-row input { flex:1; }
+    @media(max-width:600px){ .character-grid{grid-template-columns:1fr;} .portrait-preview{max-height:250px;aspect-ratio:16/9;} }
     @media (max-width: 1000px) { .layout { grid-template-columns:1fr; } .right-stack { grid-template-columns:1fr; } }
     @media (max-width: 650px) {
       .app { width:min(100% - 22px, 600px); padding-top:16px; }
@@ -436,6 +463,7 @@
       <div class="save-state"><span class="dot"></span><span id="saveLabel">Conectando...</span></div>
     </section>
 
+    <nav class="sheet-tabs" aria-label="Abas da ficha"><button type="button" class="sheet-tab active" data-sheet-tab="main">Ficha</button><button type="button" class="sheet-tab" data-sheet-tab="character">Personagem</button></nav>
     <div id="sheet" class="layout"></div>
     <p class="footer-note">Seus dados ficam salvos neste navegador. Exporte um backup para não depender de um único dispositivo.</p>
   </main>
@@ -479,7 +507,7 @@
         return {
           id: uid(), name, age:'', height:'', weight:'', origin:'', className:'',
           attributes:{forca:0,agilidade:0,intelecto:0,prestigio:0,vigor:0},
-          hp:'', hpMax:'', hpCurrent:'', skills, equipment:['','','','',''],
+          hp:'', hpMax:'', hpCurrent:'', effortCurrent:'', effortMax:'', sanity:100, magicula:100, portrait:'', story:'', personality:'', notes:'', conditions:[], skills, equipment:['','','','',''], inventory:[], inventoryFilter:'all',
           dice:{sides:20,quantity:1}, history:[], lastResult:null
         };
       }
@@ -487,7 +515,7 @@
         const base = makeCharacter(raw && raw.name ? String(raw.name) : 'Personagem importado');
         if (!raw || typeof raw !== 'object') return base;
         base.id = uid();
-        ['name','age','height','weight','origin','className','hp','hpMax','hpCurrent'].forEach(k => {
+        ['name','age','height','weight','origin','className','hp','hpMax','hpCurrent','effortCurrent','effortMax','portrait','story','personality','notes'].forEach(k => {
           if (raw[k] !== undefined && raw[k] !== null) base[k] = String(raw[k]);
         });
         // Compatibilidade com fichas antigas: o campo hp passa a representar a vida atual.
@@ -503,6 +531,10 @@
           else if (v && typeof v === 'object') base.skills[s] = {trained:!!v.trained,bonus:Number.isFinite(Number(v.bonus)) ? Math.max(0,Math.min(5,Math.floor(Number(v.bonus)))) : 0};
         });
         if (Array.isArray(raw.equipment)) base.equipment = raw.equipment.map(x => String(x || '')).slice(0,100);
+        base.sanity = Math.max(0,Math.min(100,Number(raw.sanity ?? 100)||0)); base.magicula = Math.max(0,Math.min(100,Number(raw.magicula ?? 100)||0));
+        if (Array.isArray(raw.conditions)) base.conditions = raw.conditions.map(x=>String(x||'')).slice(0,30);
+        if (Array.isArray(raw.inventory)) base.inventory = raw.inventory.map(x=>({name:String(x.name||''),type:['weapon','ammo','mission','equipment','consumable','general'].includes(x.type)?x.type:'general',weaponType:String(x.weaponType||''),damage:String(x.damage||''),range:String(x.range||''),description:String(x.description||''),editing:!!x.editing})).slice(0,100);
+        else base.inventory = base.equipment.filter(x=>String(x||'').trim()).map(x=>({name:String(x),type:'general',weaponType:'',damage:'',range:'',description:'',editing:false}));
         if (raw.dice && DICE.includes(Number(raw.dice.sides))) base.dice.sides = Number(raw.dice.sides);
         if (raw.dice && Number.isFinite(Number(raw.dice.quantity))) base.dice.quantity = Math.max(1,Math.min(50,Math.floor(Number(raw.dice.quantity))));
         if (Array.isArray(raw.history)) base.history = raw.history.slice(0,20).filter(x => x && typeof x === 'object').map(x => ({expression:String(x.expression || ''), total:Number(x.total)||0, results:Array.isArray(x.results)?x.results.map(Number).filter(Number.isFinite):[], timestamp:Number(x.timestamp)||Date.now()}));
@@ -567,12 +599,16 @@
           const val = p.skills[skill] || {trained:false,bonus:0};
           return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
         }).join('');
-        const equipment = p.equipment.map((item,i) => `<div class="equipment-row"><span class="equipment-index">${i+1}.</span><input type="text" maxlength="90" placeholder="Item ${i+1}" value="${esc(item)}" data-equipment="${i}" aria-label="Equipamento ${i+1}"><button class="remove-equip" type="button" data-action="remove-equipment" data-index="${i}" title="Remover espaço" aria-label="Remover item ${i+1}">×</button></div>`).join('');
+        const inventoryTypes = [{id:'weapon',label:'Armas'},{id:'ammo',label:'Munições'},{id:'general',label:'Geral'},{id:'mission',label:'Missão'},{id:'equipment',label:'Equipamentos'},{id:'consumable',label:'Consumíveis'}];
+        const inventoryFilter=p.inventoryFilter||'all';
+        const inventoryItems=(p.inventory||[]).map((item,i)=>({...item,_index:i})).filter(item=>inventoryFilter==='all'||item.type===inventoryFilter);
+        const equipment=inventoryItems.map(item=>`<div class="inventory-row"><div class="inventory-row-head">${item.editing?`<input type="text" maxlength="90" placeholder="Nome do item" value="${esc(item.name)}" data-inventory-field="name" data-index="${item._index}">`:`<span class="inventory-readonly">${esc(item.name||'Item sem nome')}</span>`}<select data-inventory-field="type" data-index="${item._index}" ${item.editing?'':'disabled'}>${inventoryTypes.map(t=>`<option value="${t.id}" ${item.type===t.id?'selected':''}>${t.label}</option>`).join('')}</select><button type="button" class="btn small" data-action="toggle-inventory-edit" data-index="${item._index}">${item.editing?'Concluído':'Editar'}</button></div>${item.editing?`<div class="weapon-fields">${item.type==='weapon'?`<input type="text" placeholder="Tipo da arma" value="${esc(item.weaponType)}" data-inventory-field="weaponType" data-index="${item._index}"><input type="text" placeholder="Dano" value="${esc(item.damage)}" data-inventory-field="damage" data-index="${item._index}"><input type="text" placeholder="Alcance" value="${esc(item.range)}" data-inventory-field="range" data-index="${item._index}">`:''}<input type="text" placeholder="Descrição / observações" value="${esc(item.description)}" data-inventory-field="description" data-index="${item._index}"></div>`:`<div class="panel-sub">${esc([item.weaponType,item.damage&&'Dano: '+item.damage,item.range&&'Alcance: '+item.range,item.description].filter(Boolean).join(' · '))}</div>`}<button type="button" class="btn danger small" data-action="remove-inventory" data-index="${item._index}">Remover</button></div>`).join('')||'<div class="empty-history">Nenhum item nesta categoria.</div>';
+        const conditionRows=(p.conditions||[]).map((condition,i)=>`<div class="condition-row"><input type="text" maxlength="90" value="${esc(condition)}" data-condition="${i}" placeholder="Condição ou estado"><button type="button" class="btn danger small" data-action="remove-condition" data-index="${i}">×</button></div>`).join('');
         const history = p.history.length ? p.history.map(item => `<div class="history-item"><div class="history-left"><div class="history-expr">${esc(item.expression)}</div><div class="history-time">${esc(item.detail || '')} · ${fmtTime(item.timestamp)}</div></div><div class="history-total">${Number(item.total)}</div></div>`).join('') : '<div class="empty-history">Suas rolagens vão aparecer aqui.</div>';
         let result = '';
         if (p.lastResult && Array.isArray(p.lastResult.results)) {
           const diceResults = Array.isArray(p.lastResult.diceResults) ? p.lastResult.diceResults : p.lastResult.results.map(value => ({sides:p.dice.sides || 20,value}));
-          const diceMarkup = diceResults.map(die => `<div class="roll-die" data-sides="${Number(die.sides)}" aria-label="Resultado ${Number(die.value)} em um dado de ${Number(die.sides)} lados"><div class="roll-die-shape"><span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${Number(die.sides)}</span></div></div>`).join('');
+          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape"><span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
           result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         $('sheet').innerHTML = `
@@ -585,7 +621,7 @@
                 <div class="field"><label for="charHeight">Altura</label><input id="charHeight" type="text" maxlength="16" placeholder="—" value="${esc(p.height)}" data-field="height"></div>
                 <div class="field"><label for="charWeight">Peso</label><input id="charWeight" type="text" maxlength="16" placeholder="—" value="${esc(p.weight)}" data-field="weight"></div>
                 <div class="field origin"><label for="charOrigin">Origem</label><input id="charOrigin" type="text" maxlength="70" placeholder="Origem" value="${esc(p.origin)}" data-field="origin"></div>
-                <div class="field class"><label for="charClass">Classe</label><input id="charClass" type="text" maxlength="70" placeholder="Classe" value="${esc(p.className)}" data-field="className"></div>
+                <div class="field class"><label for="charClass">Classe</label><select id="charClass" data-field="className"><option value="" ${!p.className?'selected':''}>Selecione uma classe</option><option value="Superhumano" ${p.className==='Superhumano'?'selected':''}>Superhumano</option><option value="Nexus" ${p.className==='Nexus'?'selected':''}>Nexus</option><option value="Humano" ${p.className==='Humano'?'selected':''}>Humano</option></select></div>
                 <div class="points-card"><div class="number">${remaining(p)}</div><div class="caption">Pontos restantes</div><div class="caption">${totalPoints(p)} / 28 gastos</div></div>
               </div></div>
             </section>
@@ -595,13 +631,13 @@
             </section>
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Inventário</h2><button type="button" class="btn small" data-action="add-equipment">＋ Adicionar espaço</button></div>
-              <div class="equipment"><div class="equipment-list">${equipment}</div><div class="equip-footer"><span>O que o personagem consegue carregar.</span><span>${p.equipment.filter(x=>String(x).trim()).length}/${p.equipment.length} preenchidos</span></div></div>
+              <div class="equipment"><div class="inventory-filters">${[{id:'all',label:'Ver todos'},...inventoryTypes].map(t=>`<button type="button" class="inventory-filter ${inventoryFilter===t.id?'active':''}" data-inventory-filter="${t.id}">${t.label}</button>`).join('')}</div>${equipment}<div class="equip-footer"><span>Itens organizados por categoria.</span><span>${(p.inventory||[]).length}/100 itens</span></div><button type="button" class="btn primary small" data-action="add-inventory">＋ Adicionar item</button></div>
             </section>
           </div>
           <div class="right-stack">
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Pontos de vida</h2><span class="panel-sub">Vida máxima e atual</span></div>
-              <div class="hp-wrap"><span class="heart">♥</span><div class="hp-fields"><div class="hp-field"><label for="hpMaxInput">Vida máxima</label><input id="hpMaxInput" type="number" min="0" max="9999" placeholder="0" value="${esc(p.hpMax)}" data-field="hpMax"></div><div class="hp-field"><label for="hpCurrentInput">Vida atual</label><input id="hpCurrentInput" type="number" min="0" max="9999" placeholder="0" value="${esc(p.hpCurrent !== undefined ? p.hpCurrent : p.hp)}" data-field="hpCurrent"></div></div></div>
+              <div class="resource-list">${(()=>{const hm=Math.max(0,Number(p.hpMax)||0),hc=Math.max(0,Math.min(hm,Number(p.hpCurrent!==undefined?p.hpCurrent:p.hp)||0)),em=Math.max(0,Number(p.effortMax)||0),ec=Math.max(0,Math.min(em,Number(p.effortCurrent)||0)),hp=hm?Math.round(hc/hm*100):0,ep=em?Math.round(ec/em*100):0;return `<div class="resource-card"><div class="resource-head"><span>♥ Vida</span><span class="resource-values"><input type="number" min="0" max="9999" value="${esc(p.hpCurrent??p.hp??'')}" data-field="hpCurrent" aria-label="Vida atual"> / <input type="number" min="0" max="9999" value="${esc(p.hpMax)}" data-field="hpMax" aria-label="Vida máxima"></span></div><div class="resource-track"><div class="resource-fill" style="width:${hp}%"></div></div><div class="resource-percent">${hp}%</div></div><div class="resource-card effort"><div class="resource-head"><span>⚡ Esforço</span><span class="resource-values"><input type="number" min="0" max="9999" value="${esc(p.effortCurrent)}" data-field="effortCurrent"> / <input type="number" min="0" max="9999" value="${esc(p.effortMax)}" data-field="effortMax"></span></div><div class="resource-track"><div class="resource-fill" style="width:${ep}%"></div></div><div class="resource-percent">${ep}%</div></div>${p.className==='Nexus'?['sanity','magicula'].map(k=>`<div class="resource-card sanity"><div class="resource-head"><span>${k==='sanity'?'Sanidade':'Magicula'}</span><span class="resource-values"><input type="number" min="0" max="100" value="${Number(p[k]??100)}" data-field="${k}">%</span></div><div class="resource-track"><div class="resource-fill" style="width:${Number(p[k]??100)}%"></div></div></div>`).join(''):''}`})()}</div>
             </section>
             <section class="panel">
               <div class="panel-head"><h2 class="panel-title">Perícias</h2><span class="panel-sub">Marque o treinamento e ajuste o bônus</span></div>
@@ -621,7 +657,8 @@
                 <div class="history"><div class="history-head"><span class="history-title">Histórico deste personagem</span><button type="button" class="btn small" data-action="clear-history">Limpar</button></div><div class="history-list">${history}</div></div>
               </div>
             </section>
-          </div>`;
+          </div>
+          <section class="panel" style="grid-column:1/-1"><div class="panel-head"><h2 class="panel-title">Personagem</h2><span class="panel-sub">Retrato, história e anotações</span></div><div class="character-grid"><div class="portrait-box"><img class="portrait-preview ${p.portrait?'':'hidden'}" src="${esc(p.portrait)}" alt="Retrato do personagem" onerror="this.classList.add('hidden')"><div class="field"><label for="portraitUrl">Imagem do personagem (URL)</label><input id="portraitUrl" type="text" value="${esc(p.portrait)}" data-field="portrait" placeholder="https://..."></div><div class="condition-list"><strong>Condições e estados</strong>${conditionRows}<button type="button" class="btn small" data-action="add-condition">＋ Adicionar condição</button></div></div><div class="character-fields"><div class="field"><label for="charStory">História</label><textarea id="charStory" data-field="story" placeholder="História do personagem">${esc(p.story)}</textarea></div><div class="field"><label for="charPersonality">Personalidade</label><textarea id="charPersonality" data-field="personality" placeholder="Personalidade">${esc(p.personality)}</textarea></div><div class="field"><label for="charNotes">Anotações</label><textarea id="charNotes" data-field="notes" placeholder="Informações importantes da campanha">${esc(p.notes)}</textarea></div></div></div></section>`;
         $('saveLabel').textContent = currentUser ? 'Sincronizado com a nuvem' : 'Salvo neste navegador';
       }
 
@@ -852,6 +889,9 @@
         const p = active(); const t = e.target;
         if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
+        if (t.dataset.inventoryField) { const item=p.inventory[Number(t.dataset.index)]; if(item){item[t.dataset.inventoryField]=t.value;persist();} }
+        if (t.dataset.condition !== undefined) { p.conditions[Number(t.dataset.condition)]=t.value; persist(); }
+        if (t.dataset.field==='sanity'||t.dataset.field==='magicula') { p[t.dataset.field]=Math.max(0,Math.min(100,Number(t.value)||0)); persist(); render(); }
         if (t.dataset.skill) { p.skills[t.dataset.skill] = p.skills[t.dataset.skill] || {trained:false,bonus:0}; p.skills[t.dataset.skill].trained = t.checked; persist(); t.nextElementSibling.classList.toggle('trained',t.checked); }
         if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; const skill = p.skills[t.dataset.skillBonus]; const previous = Math.max(0, Number(skill.bonus) || 0); const available = remaining(p) + previous; skill.bonus = Math.max(0, Math.min(5, available, Math.floor(Number(t.value) || 0))); t.value = skill.bonus; persist(); render(); }
       });
@@ -867,13 +907,17 @@
             if (action === 'attr-minus' && p.attributes[key] > 0) p.attributes[key]--;
             persist(); render();
           }
-          if (action === 'clear-equipment') { p.equipment[Number(button.dataset.index)] = ''; persist(); render(); }
-          if (action === 'add-equipment') { if (p.equipment.length >= 100) { showToast('Limite de 100 espaços no inventário.'); return; } p.equipment.push(''); persist(); render(); }
-          if (action === 'remove-equipment') { p.equipment.splice(Number(button.dataset.index),1); if (!p.equipment.length) p.equipment.push(''); persist(); render(); }
+          if (action === 'add-inventory') { if(p.inventory.length>=100){showToast('Limite de 100 itens.');return;} p.inventory.push({name:'',type:'general',weaponType:'',damage:'',range:'',description:'',editing:true});persist();render(); }
+          if (action === 'remove-inventory') { p.inventory.splice(Number(button.dataset.index),1);persist();render(); }
+          if (action === 'toggle-inventory-edit') { const item=p.inventory[Number(button.dataset.index)];if(item){item.editing=!item.editing;persist();render();} }
+          if (action === 'add-condition') { if(p.conditions.length<30)p.conditions.push('');persist();render(); }
+          if (action === 'remove-condition') { p.conditions.splice(Number(button.dataset.index),1);persist();render(); }
           if (action === 'clear-history') { p.history = []; p.lastResult = null; persist(); render(); showToast('Histórico limpo.'); }
         }
       });
       $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
+      document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); });
+      $('sheet').addEventListener('click', e => { const filter=e.target.closest('[data-inventory-filter]'); if(filter){active().inventoryFilter=filter.dataset.inventoryFilter;persist();render();} });
       $('sheet').addEventListener('change', e => {
         if (e.target.id === 'diceExpression') { active().dice.expression = e.target.value; persist(); }
         if (e.target.id === 'rollMode') { active().dice.mode = e.target.value === 'highest' ? 'highest' : 'sum'; persist(); }
