@@ -142,6 +142,7 @@
     .roll-die { width:66px; height:70px; display:grid; place-items:center; position:relative; isolation:isolate; animation:diceReveal .48s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes diceReveal { 0% { transform:translateY(-16px) rotate(-24deg) scale(.65); opacity:0; } 65% { transform:translateY(3px) rotate(8deg) scale(1.08); opacity:1; } 100% { transform:translateY(0) rotate(0) scale(1); opacity:1; } }
     .roll-die.critical-low .roll-die-shape { background:#d94b55; color:#fff; } .roll-die.critical-high .roll-die-shape { background:#45b879; color:#102319; }
+    .roll-die.discarded { opacity:.38; filter:grayscale(.85); transform:scale(.92); } .roll-die.kept { outline:2px solid var(--accent-strong); outline-offset:2px; border-radius:12px; }
     .roll-die.critical-low .roll-die-value,.roll-die.critical-high .roll-die-value { color:inherit; }
     @media (prefers-reduced-motion:reduce) { .roll-die { animation:none; } }
     .roll-die-shape { position:absolute; inset:3px 5px; display:grid; place-items:center; background:var(--accent); color:var(--accent-ink); clip-path:polygon(50% 1%,91% 25%,98% 72%,67% 99%,22% 91%,2% 51%,15% 12%); filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
@@ -651,7 +652,7 @@
         let result = '';
         if (p.lastResult && Array.isArray(p.lastResult.results)) {
           const diceResults = Array.isArray(p.lastResult.diceResults) ? p.lastResult.diceResults : p.lastResult.results.map(value => ({sides:p.dice.sides || 20,value}));
-          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'';return `<div class="roll-die ${critical}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados"><div class="roll-die-shape">${sides===20?`<svg class="d20-svg" viewBox="0 0 100 100" aria-hidden="true"><path class="d20-body" d="M50 2 L92 24 L92 68 L70 91 L50 99 L30 91 L8 68 L8 24 Z"/><path class="d20-facets" d="M50 2 L28 38 L72 38 Z M8 24 L28 38 L8 68 L8 68 M92 24 L72 38 L92 68 M28 38 L72 38 M28 38 L50 78 L72 38 M8 68 L28 38 M92 68 L72 38 M8 68 L50 78 L50 99 M92 68 L50 78 L50 99 M8 68 L50 78 L92 68 M30 91 L50 99 L70 91"/></svg>`:'' }<span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
+          const diceMarkup = diceResults.map(die => {const sides=Number(die.sides),value=Math.abs(Number(die.value)),critical=sides!==2&&value===1?'critical-low':sides!==2&&value===sides?'critical-high':'',choice=die.kept===false?'discarded':die.kept===true?'kept':'';return `<div class="roll-die ${critical} ${choice}" data-sides="${sides}" aria-label="Resultado ${Number(die.value)} em um dado de ${sides} lados${die.kept===false?', descartado':die.kept===true?', escolhido':''}"><div class="roll-die-shape">${sides===20?`<svg class="d20-svg" viewBox="0 0 100 100" aria-hidden="true"><path class="d20-body" d="M50 2 L92 24 L92 68 L70 91 L50 99 L30 91 L8 68 L8 24 Z"/><path class="d20-facets" d="M50 2 L28 38 L72 38 Z M8 24 L28 38 L8 68 L8 68 M92 24 L72 38 L92 68 M28 38 L72 38 M28 38 L50 78 L72 38 M8 68 L28 38 M92 68 L72 38 M8 68 L50 78 L50 99 M92 68 L50 78 L50 99 M8 68 L50 78 L92 68 M30 91 L50 99 L70 91"/></svg>`:'' }<span class="roll-die-value">${Number(die.value)}</span><span class="roll-die-label">D${sides}</span></div></div>`;}).join('');
           result = `<div class="result show"><div class="result-top"><div class="result-formula">${esc(p.lastResult.expression)}</div><div class="result-total">${Number(p.lastResult.total)}</div></div><div class="roll-dice">${diceMarkup}</div><div class="result-values">${p.lastResult.detail ? esc(p.lastResult.detail) : ''}</div></div>`;
         }
         const diaryRows=p.diary.map((entry,i)=>'<article class="roster-card"><small>'+new Date(entry.timestamp||Date.now()).toLocaleString('pt-BR')+'</small><textarea data-diary-text data-index="'+i+'" maxlength="1200">'+esc(entry.text||'')+'</textarea><button class="btn danger small" data-action="remove-diary" data-index="'+i+'">Remover registro</button></article>').join('')||'<div class="panel-sub">O diário ainda está em branco.</div>';
@@ -779,9 +780,19 @@
           if (dice) {
             const count = Number(dice[1]), sides = Number(dice[2]);
             if (count < 1 || count > 50 || results.length + count > 100) { showToast('Use de 1 a 50 dados por termo e até 100 dados por rolagem.'); return; }
-            const rolls = Array.from({length:count},() => {if(sides===20&&count===1&&p.dice.advantage&&p.dice.advantage!=='normal'){const a=secureRandom(20),b=secureRandom(20),chosen=p.dice.advantage==='advantage'?Math.max(a,b):Math.min(a,b);detail.push((p.dice.advantage==='advantage'?'Vantagem':'Desvantagem')+': ['+a+', '+b+'] → '+chosen);return chosen;}return secureRandom(sides);});
+            const shownRolls=[];
+            const rolls = Array.from({length:count},() => {
+              if(sides===20&&count===1&&p.dice.advantage&&p.dice.advantage!=='normal'){
+                const a=secureRandom(20),b=secureRandom(20),keepA=p.dice.advantage==='advantage'?a>=b:a<=b,chosen=keepA?a:b;
+                shownRolls.push({sides,value:a*sign,kept:keepA},{sides,value:b*sign,kept:!keepA});
+                detail.push((p.dice.advantage==='advantage'?'Vantagem':'Desvantagem')+': ['+a+', '+b+'] → '+chosen);
+                return chosen;
+              }
+              const value=secureRandom(sides);shownRolls.push({sides,value:value*sign});return value;
+            });
             diceSum += rolls.reduce((a,b)=>a+b,0) * sign;
             signedDice.push(...rolls.map(value => value * sign));
+            results.push(...rolls); diceResults.push(...shownRolls); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
             results.push(...rolls); diceResults.push(...rolls.map(value => ({sides,value: value * sign}))); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
           } else {
             const n = Number(part) * sign;
