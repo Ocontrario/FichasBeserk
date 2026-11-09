@@ -96,9 +96,13 @@
     .attribute-name { font-family:Georgia,serif; font-size:17px; font-weight:700; letter-spacing:.025em; }
     .attribute-desc { color:var(--muted); font-size:11px; margin-top:3px; }
     .stepper { display:flex; align-items:center; gap:7px; }
-    .stepper button { width:30px; height:30px; border:1px solid #4a5148; border-radius:8px; color:var(--accent); background:#191d19; font-size:17px; line-height:1; }
-    .stepper button:hover { border-color:var(--accent); background:#2c3028; }
-    .stepper .value { min-width:25px; text-align:center; font-family:Georgia,serif; font-size:22px; font-weight:700; }
+    .stepper button { width:38px; height:38px; border:1px solid #4a5148; border-radius:11px; color:var(--accent); background:linear-gradient(145deg,#242a24,#171b17); font-size:21px; line-height:1; transition:transform .12s,border-color .12s,background .12s; touch-action:manipulation; }
+    .stepper button:hover:not(:disabled) { border-color:var(--accent); background:#343a30; transform:translateY(-1px); }
+    .stepper button:disabled { opacity:.3; cursor:not-allowed; }
+    .attribute-value { width:48px; height:38px; padding:3px !important; border:1px solid var(--line) !important; border-radius:10px !important; background:rgba(0,0,0,.18) !important; color:var(--text) !important; text-align:center; font:700 21px Georgia,serif !important; appearance:textfield; -moz-appearance:textfield; }
+    .attribute-value::-webkit-inner-spin-button,.attribute-value::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+    .attribute-value:focus { outline:2px solid var(--accent); outline-offset:2px; }
+    @media(max-width:520px){.attribute-stepper{gap:5px}.attribute-stepper button{width:42px;height:42px}.attribute-value{width:52px;height:42px}}
     .attribute-peak { position:relative; }
     .attribute-peak .attribute-name { color:var(--accent-strong); text-shadow:0 0 12px rgba(234,215,169,.35); }
     .peak-mark { display:inline-grid; place-items:center; width:19px; height:19px; margin-left:5px; color:#201d15; background:linear-gradient(145deg,#fff1b8,#c99b42); border-radius:50%; font:900 12px/1 Georgia,serif; vertical-align:2px; box-shadow:0 0 0 2px rgba(234,215,169,.18),0 0 16px rgba(234,215,169,.5); animation:peakReveal .8s ease-out both; }
@@ -703,7 +707,7 @@
           return `
           <div class="attribute-row ${atPeak?'attribute-peak':''}">
             <div><div class="attribute-name">${label} ${atPeak?'<span class="peak-mark" title="Atributo no limite máximo">✦</span>':''}</div><div class="attribute-desc">${desc}</div></div>
-            <div class="stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}">−</button><span class="value">${value}</span><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || value >= 5?'disabled':''}>＋</button></div>
+            <div class="stepper attribute-stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}" ${value<=0?'disabled':''}>−</button><input class="attribute-value" type="number" inputmode="numeric" min="0" max="5" step="1" value="${value}" data-attribute-value="${key}" aria-label="Pontos de ${label}" title="Toque para digitar o valor"><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || value >= 5?'disabled':''}>＋</button></div>
           </div>`;
         }).join('');
         const skillMarkup = [...SKILLS].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'})).map((skill,i) => {
@@ -1168,6 +1172,7 @@
       $('sheet').addEventListener('change', e => {
         const p = active(); const t = e.target;
         if(t.id==='pointLimitInput'){p.pointLimit=Math.max(0,Math.min(9999,Math.floor(Number(t.value)||0)));persist();render();showToast('Limite de pontos atualizado!');return;}
+        if(t.dataset.attributeValue){const key=t.dataset.attributeValue;const requested=Math.max(0,Math.min(5,Math.floor(Number(t.value)||0)));const current=Number(p.attributes[key])||0;const allowed=Math.min(requested,current+remaining(p));p.attributes[key]=allowed;persist();render();return;}
         if(t.id==='portraitFile' && t.files && t.files[0]){ const file=t.files[0]; if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)){showToast('Escolha JPG, PNG, WebP ou GIF.');t.value='';return;} if(file.size>12*1024*1024){showToast('A imagem precisa ter menos de 12 MB.');t.value='';return;} const reader=new FileReader(); reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,1200/img.height),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);p.portrait=canvas.toDataURL('image/jpeg',.8);persist();render();showToast('Retrato atualizado!');};img.onerror=()=>showToast('Não foi possível abrir essa imagem.');img.src=String(reader.result);};reader.onerror=()=>showToast('Não foi possível ler a imagem.');reader.readAsDataURL(file); }
         if (t.dataset.field) { p[t.dataset.field] = t.value; if (t.dataset.field === 'name') { const opt = $('playerSelect').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (opt) opt.textContent = p.name || 'Sem nome'; } persist(); if(['hpMax','hpCurrent','effortMax','effortCurrent','portrait','className'].includes(t.dataset.field)){if(t.dataset.field==='portrait'){const img=document.querySelector('.portrait-preview');if(img){img.src=t.value;img.classList.toggle('hidden',!t.value);}}else render();} }
         if (t.dataset.equipment !== undefined) { p.equipment[Number(t.dataset.equipment)] = t.value; persist(); }
