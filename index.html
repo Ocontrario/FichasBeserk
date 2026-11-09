@@ -117,6 +117,8 @@
     .hp-wrap input { width:86px; text-align:center; font-family:Georgia,serif; font-size:21px; font-weight:700; color:var(--accent-strong); }
     .skills { padding:7px 17px 17px; display:grid; grid-template-columns:1fr 1fr; column-gap:18px; }
     .skill { display:flex; align-items:center; gap:8px; min-width:0; padding:8px 1px; border-bottom:1px solid rgba(58,65,57,.62); }
+    .skill.skill-trained { background:linear-gradient(90deg,rgba(217,194,140,.10),transparent 88%); border-bottom-color:rgba(217,194,140,.28); }
+    .skill.skill-trained .skill-check { box-shadow:0 0 0 3px rgba(217,194,140,.09); }
     .skill-check { appearance:none; flex:0 0 auto; width:15px; height:15px; margin:0; border:1.5px solid #879084; border-radius:50%; background:transparent; cursor:pointer; position:relative; }
     .skill-check:checked { background:var(--accent); border-color:var(--accent); }
     .skill-check:checked:after { content:""; position:absolute; width:5px; height:8px; border:solid #222319; border-width:0 2px 2px 0; transform:rotate(45deg); left:4px; top:1px; }
@@ -710,9 +712,13 @@
             <div class="stepper attribute-stepper"><button type="button" data-action="attr-minus" data-key="${key}" aria-label="Diminuir ${label}" ${value<=0?'disabled':''}>−</button><input class="attribute-value" type="number" inputmode="numeric" min="0" max="5" step="1" value="${value}" data-attribute-value="${key}" aria-label="Pontos de ${label}" title="Toque para digitar o valor"><button type="button" data-action="attr-plus" data-key="${key}" aria-label="Aumentar ${label}" ${remaining(p)<=0 || value >= 5?'disabled':''}>＋</button></div>
           </div>`;
         }).join('');
-        const skillMarkup = [...SKILLS].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'})).map((skill,i) => {
+        const skillMarkup = [...SKILLS].sort((a,b) => {
+          const aTrained = !!p.skills[a]?.trained, bTrained = !!p.skills[b]?.trained;
+          if (aTrained !== bTrained) return Number(bTrained) - Number(aTrained);
+          return a.localeCompare(b,'pt-BR',{sensitivity:'base'});
+        }).map((skill,i) => {
           const val = p.skills[skill] || {trained:false,bonus:0};
-          return `<label class="skill"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
+          return `<label class="skill ${val.trained?'skill-trained':''}"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
         }).join('');
         const inventoryTypes = [{id:'weapon',label:'Armas'},{id:'ammo',label:'Munições'},{id:'general',label:'Geral'},{id:'mission',label:'Missão'},{id:'equipment',label:'Equipamentos'},{id:'consumable',label:'Consumíveis'}];
         const inventoryFilter=p.inventoryFilter||'all';
