@@ -793,7 +793,6 @@
             diceSum += rolls.reduce((a,b)=>a+b,0) * sign;
             signedDice.push(...rolls.map(value => value * sign));
             results.push(...rolls); diceResults.push(...shownRolls); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
-            results.push(...rolls); diceResults.push(...rolls.map(value => ({sides,value: value * sign}))); detail.push(`${sign<0?'-':'+'}${count}d${sides}: [${rolls.join(', ')}]`);
           } else {
             const n = Number(part) * sign;
             modifierTotal += n;
