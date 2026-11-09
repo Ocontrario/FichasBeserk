@@ -1,5 +1,6 @@
 -- Crônica: campanhas compartilhadas, membros e retratos de personagens
 -- Execute este arquivo uma única vez no Supabase > SQL Editor.
+create extension if not exists pgcrypto;
 
 create table if not exists public.cronica_campaigns (
   id uuid primary key default gen_random_uuid(),
