@@ -707,7 +707,7 @@
                   <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
                   <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
-                  <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}">${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
+                  <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}" ${(p.dice.testAttribute||'forca')===key?'selected':''}>${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
                   <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste (4+ pontos)</label><select id="attributeTestMode"><option value="highest" ${p.dice.attributeTestMode!=="sum"?"selected":""}>Rolar 3 dados e ficar com o maior</option><option value="sum" ${p.dice.attributeTestMode==="sum"?"selected":""}>Rolar 2 dados e somar</option></select></div>
                   <div class="die-summary">O teste usa o dado selecionado acima. Com menos de 4 pontos, a quantidade de dados acompanha o atributo. Com 4 ou mais, escolha um estilo especial.</div>
                   <button type="button" class="btn primary roll-btn" id="attributeTestBtn" style="margin-bottom:12px">⚔ Fazer teste de atributo</button>
@@ -824,39 +824,50 @@
 
       function rollAttributeTest() {
         const p = active();
-        const key = $('testAttribute').value;
-        const attribute = ATTRIBUTES.find(([name]) => name === key);
+        const key = p.dice.testAttribute || $('testAttribute').value || 'forca';
+        const attribute = ATTRIBUTES.find(([name]) => name === key) || ATTRIBUTES[0];
         const points = Number(p.attributes[key]) || 0;
         const sides = Number(p.dice.sides) || 20;
         if (points <= 0) { showToast('Esse atributo precisa ter pelo menos 1 ponto para realizar o teste.'); return; }
+
         let rolls = [];
         let total = 0;
         let diceResults = [];
         let modeLabel = '';
         let detail = '';
+        let style = 'normal';
 
         if (points < 4) {
-          const count = points;
-          rolls = Array.from({length:count}, () => secureRandom(sides));
+          rolls = Array.from({length:points}, () => secureRandom(sides));
           total = rolls.reduce((a,b) => a+b, 0);
           diceResults = rolls.map(value => ({sides,value,kept:true}));
-          modeLabel = count + 'd' + sides + ' somados';
-          detail = '[' + rolls.join(', ') + '] → soma dos dados';
+          modeLabel = points + 'd' + sides + ' somados';
+          detail = '[' + rolls.join(', ') + '] → soma dos dados = ' + total;
         } else {
-          const style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
-          rolls = style === 'sum'
-            ? [secureRandom(sides), secureRandom(sides)]
-            : [secureRandom(sides), secureRandom(sides), secureRandom(sides)];
-          const chosen = style === 'sum' ? rolls.reduce((a,b)=>a+b,0) : Math.max(...rolls);
-          const bonus = style === 'sum' ? Math.max(0, points - 3) : 0;
-          total = chosen + bonus;
-          diceResults = rolls.map(value => ({sides,value,kept:style==='sum'||value===chosen}));
-          modeLabel = style === 'sum' ? '2d' + sides + ' somados' : '3d' + sides + ' · maior resultado';
-          detail = '[' + rolls.join(', ') + '] → ' + chosen + (bonus ? ' + ' + bonus + ' de atributo' : '') + ' = ' + total;
+          style = p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest';
+          if (style === 'sum') {
+            rolls = [secureRandom(sides), secureRandom(sides)];
+            const diceTotal = rolls[0] + rolls[1];
+            const bonus = Math.max(0, points - 3);
+            total = diceTotal + bonus;
+            diceResults = rolls.map(value => ({sides,value,kept:true}));
+            modeLabel = '2d' + sides + ' somados';
+            detail = '[' + rolls.join(', ') + '] → ' + diceTotal + (bonus ? ' + ' + bonus + ' de atributo' : '') + ' = ' + total;
+          } else {
+            rolls = [secureRandom(sides), secureRandom(sides), secureRandom(sides)];
+            const highestIndex = rolls.indexOf(Math.max(...rolls));
+            const chosen = rolls[highestIndex];
+            total = chosen;
+            diceResults = rolls.map((value,index) => ({sides,value,kept:index===highestIndex}));
+            modeLabel = '3d' + sides + ' · maior resultado';
+            detail = '[' + rolls.join(', ') + '] → maior resultado: ' + chosen + ' = ' + total;
+          }
         }
+
+        p.dice.testAttribute = key;
         const entry = {
-          expression: 'Teste de ' + attribute[1] + ' · ' + modeLabel + (points >= 4 && p.dice.attributeTestMode === 'sum' ? ' · bônus +' + Math.max(0,points-3) : ''),
-          mode: p.dice.attributeTestMode === 'sum' ? 'sum' : 'highest',
+          expression: 'Teste de ' + attribute[1] + ' · ' + modeLabel + (points >= 4 && style === 'sum' ? ' · bônus +' + Math.max(0,points-3) : ''),
+          mode: style,
           results: rolls,
           diceResults,
           total,
@@ -1109,6 +1120,7 @@
         if (e.target.id === 'rollMode') { active().dice.mode = e.target.value === 'highest' ? 'highest' : 'sum'; persist(); }
         if (e.target.id === 'rollAdvantage') { active().dice.advantage = ['advantage','disadvantage'].includes(e.target.value)?e.target.value:'normal'; persist(); }
         if (e.target.id === 'attributeTestMode') { active().dice.attributeTestMode = e.target.value === 'sum' ? 'sum' : 'highest'; persist(); showToast(e.target.value === 'sum' ? 'Teste configurado: 2d20 somados.' : 'Teste configurado: 3d20, maior resultado.'); }
+        if (e.target.id === 'testAttribute') { active().dice.testAttribute = e.target.value; persist(); }
       });
       $('sheet').addEventListener('keydown', e => { if (e.target.id === 'diceExpression' && e.key === 'Enter') roll(); });
       // A ficha só é exibida depois que uma conta autenticada carregar seus próprios personagens.
