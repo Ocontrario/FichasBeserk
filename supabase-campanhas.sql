@@ -35,17 +35,17 @@ alter table public.cronica_campaign_snapshots enable row level security;
 
 create or replace function public.cronica_is_campaign_member(p_campaign_id uuid)
 returns boolean language sql stable security definer set search_path = public
-as $
+as $$
   select exists(select 1 from public.cronica_campaign_members
     where campaign_id = p_campaign_id and user_id = auth.uid());
-$;
+$$;
 
 create or replace function public.cronica_is_campaign_master(p_campaign_id uuid)
 returns boolean language sql stable security definer set search_path = public
-as $
+as $$
   select exists(select 1 from public.cronica_campaign_members
     where campaign_id = p_campaign_id and user_id = auth.uid() and role = 'master');
-$;
+$$;
 
 revoke all on function public.cronica_is_campaign_member(uuid) from public;
 revoke all on function public.cronica_is_campaign_master(uuid) from public;
