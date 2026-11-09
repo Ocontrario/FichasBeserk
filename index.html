@@ -698,6 +698,10 @@
                   <div class="field" style="margin-top:10px"><label for="rollMode">Tipo de rolagem</label><select id="rollMode"><option value="sum" ${p.dice.mode !== 'highest'?'selected':''}>Dano / somar todos os dados</option><option value="highest" ${p.dice.mode === 'highest'?'selected':''}>Perícia / maior dado + bônus</option></select></div>
                   <div class="field" style="margin-top:10px"><label for="rollAdvantage">Rolagem de D20</label><select id="rollAdvantage"><option value="normal" ${p.dice.advantage!=="advantage"&&p.dice.advantage!=="disadvantage"?"selected":""}>Normal</option><option value="advantage" ${p.dice.advantage==="advantage"?"selected":""}>Vantagem · rolar 2 e ficar com o maior</option><option value="disadvantage" ${p.dice.advantage==="disadvantage"?"selected":""}>Desvantagem · rolar 2 e ficar com o menor</option></select></div>
                   <div class="die-summary">Perícia: maior dado + modificadores. Dano: soma de todos os dados + modificadores.</div>
+                  <div class="field" style="margin-top:14px"><label for="testAttribute">Teste de atributo (requer 4 pontos)</label><select id="testAttribute">${ATTRIBUTES.map(([key,label])=>`<option value="${key}">${label} · ${Number(p.attributes[key])||0} pts</option>`).join('')}</select></div>
+                  <div class="field" style="margin-top:9px"><label for="attributeTestMode">Estilo do teste</label><select id="attributeTestMode"><option value="highest">Rolar 3d20 e ficar com o maior</option><option value="sum">Rolar 2d20 e somar</option></select></div>
+                  <div class="die-summary">Com 4 pontos no atributo: escolha um estilo e receba +1 no resultado.</div>
+                  <button type="button" class="btn primary roll-btn" id="attributeTestBtn" style="margin-bottom:12px">⚔ Fazer teste de atributo</button>
                   <button type="button" class="btn primary roll-btn" id="rollBtn">🎲 Rolar expressão</button>
                 </div>
                 ${result}
@@ -807,6 +811,39 @@
         const entry = {expression:`${label}: ${expression.replace(/([+-])/g,' $1 ').trim()}`,mode,results,diceResults,total,timestamp:Date.now(),detail:detail.join(' | ')};
         p.lastResult = entry; p.history.unshift(entry); p.history = p.history.slice(0,20);
         persist(); render();
+      }
+
+      function rollAttributeTest() {
+        const p = active();
+        const key = $('testAttribute').value;
+        const attribute = ATTRIBUTES.find(([name]) => name === key);
+        const points = Number(p.attributes[key]) || 0;
+        if (points < 4) {
+          showToast('Esse teste especial exige 4 pontos no atributo escolhido.');
+          return;
+        }
+        const style = $('attributeTestMode').value === 'sum' ? 'sum' : 'highest';
+        const rolls = style === 'sum'
+          ? [secureRandom(20), secureRandom(20)]
+          : [secureRandom(20), secureRandom(20), secureRandom(20)];
+        const chosen = style === 'sum' ? rolls.reduce((a,b)=>a+b,0) : Math.max(...rolls);
+        const total = chosen + 1;
+        const diceResults = rolls.map(value => ({sides:20,value,kept:style==='sum'||value===chosen}));
+        const modeLabel = style === 'sum' ? '2d20 somados' : '3d20 · maior resultado';
+        const entry = {
+          expression: 'Teste de ' + attribute[1] + ' · ' + modeLabel + ' +1',
+          mode: style,
+          results: rolls,
+          diceResults,
+          total,
+          timestamp: Date.now(),
+          detail: '[' + rolls.join(', ') + '] → ' + chosen + ' + 1 de atributo = ' + total
+        };
+        p.lastResult = entry;
+        p.history.unshift(entry);
+        p.history = p.history.slice(0,20);
+        persist();
+        render();
       }
 
       function usernameEmail(username) {
@@ -1040,7 +1077,7 @@
           if(action==='combat-back'){activeSheetTab='main';render();}
         }
       });
-      $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); });
+      $('sheet').addEventListener('click', e => { if (e.target.closest('#rollBtn')) roll(); if (e.target.closest('#attributeTestBtn')) rollAttributeTest(); });
       document.querySelector('.sheet-tabs').addEventListener('click', e => { const tab=e.target.closest('[data-sheet-tab]'); if(!tab)return; activeSheetTab=tab.dataset.sheetTab; document.querySelectorAll('.sheet-tab').forEach(b=>b.classList.toggle('active',b===tab)); const main=$('sheet').querySelector('.main-tab-panel'); const character=$('sheet').querySelector('.character-tab-panel'); if(main)main.classList.toggle('hidden',activeSheetTab!=='main'); if(character)character.classList.toggle('hidden',activeSheetTab!=='character'); const journal=$('sheet').querySelector('.journal-panel'); const combat=$('sheet').querySelector('.combat-panel'); if(journal)journal.classList.toggle('hidden',activeSheetTab!=='journal'); if(combat)combat.classList.toggle('hidden',activeSheetTab!=='combat'); });
       $('sheet').addEventListener('click', e => { const filter=e.target.closest('[data-inventory-filter]'); if(filter){active().inventoryFilter=filter.dataset.inventoryFilter;persist();render();} });
       $('sheet').addEventListener('change', e => {
