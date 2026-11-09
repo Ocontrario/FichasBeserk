@@ -125,6 +125,10 @@
     .skill-name { font-size:11px; color:#e0e2d9; flex:1; min-width:0; }
     .skill-name.trained { color:var(--accent-strong); }
     .skill-bonus { width:43px; padding:5px 4px !important; text-align:center; font-size:11px; }
+    .skill-bonus-control { display:flex; align-items:center; gap:3px; flex:0 0 auto; }
+    .skill-step { display:grid; place-items:center; width:22px; height:26px; padding:0; border:1px solid rgba(217,194,140,.35); border-radius:7px; background:rgba(217,194,140,.08); color:var(--accent-strong); font-size:16px; font-weight:800; line-height:1; cursor:pointer; }
+    .skill-step:hover:not(:disabled) { background:rgba(217,194,140,.2); border-color:var(--accent); }
+    .skill-step:disabled { opacity:.3; cursor:not-allowed; }
     .equipment { padding:14px 19px 18px; }
     .equipment-list { display:grid; gap:8px; }
     .equipment-row { display:grid; grid-template-columns:25px 1fr 30px; align-items:center; gap:9px; }
@@ -718,7 +722,8 @@
           return a.localeCompare(b,'pt-BR',{sensitivity:'base'});
         }).map((skill,i) => {
           const val = p.skills[skill] || {trained:false,bonus:0};
-          return `<label class="skill ${val.trained?'skill-trained':''}"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><input class="skill-bonus" type="number" min="0" max="5" value="${Math.max(0,Math.min(5,Number(val.bonus)||0))}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"></label>`;
+          const bonus = Math.max(0,Math.min(5,Number(val.bonus)||0));
+          return `<label class="skill ${val.trained?'skill-trained':''}"><input class="skill-check" type="checkbox" data-skill="${esc(skill)}" ${val.trained?'checked':''} aria-label="Treinamento em ${esc(skill)}"><span class="skill-name ${val.trained?'trained':''}">${esc(skill)}</span><span class="skill-bonus-control"><button type="button" class="skill-step" data-skill-step="minus" data-skill="${esc(skill)}" aria-label="Diminuir bônus de ${esc(skill)}" ${bonus<=0?'disabled':''}>−</button><input class="skill-bonus" type="number" min="0" max="5" value="${bonus}" data-skill-bonus="${esc(skill)}" aria-label="Bônus de ${esc(skill)}" title="Bônus da perícia"><button type="button" class="skill-step" data-skill-step="plus" data-skill="${esc(skill)}" aria-label="Aumentar bônus de ${esc(skill)}" ${bonus>=5||remaining(p)<=0?'disabled':''}>＋</button></span></label>`;
         }).join('');
         const inventoryTypes = [{id:'weapon',label:'Armas'},{id:'ammo',label:'Munições'},{id:'general',label:'Geral'},{id:'mission',label:'Missão'},{id:'equipment',label:'Equipamentos'},{id:'consumable',label:'Consumíveis'}];
         const inventoryFilter=p.inventoryFilter||'all';
@@ -1193,6 +1198,8 @@
         if (t.dataset.skillBonus) { p.skills[t.dataset.skillBonus] = p.skills[t.dataset.skillBonus] || {trained:false,bonus:0}; const skill = p.skills[t.dataset.skillBonus]; const previous = Math.max(0, Number(skill.bonus) || 0); const available = remaining(p) + previous; skill.bonus = Math.max(0, Math.min(5, available, Math.floor(Number(t.value) || 0))); t.value = skill.bonus; persist(); render(); }
       });
       $('sheet').addEventListener('click', e => {
+        const skillStep = e.target.closest('[data-skill-step]');
+        if(skillStep){const p=active();const key=skillStep.dataset.skill;p.skills[key]=p.skills[key]||{trained:false,bonus:0};const current=Math.max(0,Number(p.skills[key].bonus)||0);if(skillStep.dataset.skillStep==='plus'&&current<5&&remaining(p)>0)p.skills[key].bonus=current+1;if(skillStep.dataset.skillStep==='minus'&&current>0)p.skills[key].bonus=current-1;persist();render();return;}
         const dieButton = e.target.closest('[data-die]');
         if (dieButton) { activeDie = Number(dieButton.dataset.die); active().dice.sides = activeDie; persist(); render(); return; }
         const button = e.target.closest('[data-action]');
